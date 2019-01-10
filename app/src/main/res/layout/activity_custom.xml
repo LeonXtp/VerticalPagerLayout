@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.leonxtp.fingerview.custom.MyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/my_scroll_view"
+    android:layout_width="match_parent"
+    android:layout_height="600dp">
+
+    <com.leonxtp.fingerview.custom.MyVerticalPagerLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <View
+            android:id="@+id/view_top"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#ff6083" />
+
+        <View
+            android:id="@+id/view_middle"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:background="#009be6" />
+
+        <View
+            android:id="@+id/view_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="600dp"
+            android:background="#93ff03" />
+
+    </com.leonxtp.fingerview.custom.MyVerticalPagerLayout>
+
+</com.leonxtp.fingerview.custom.MyScrollView>

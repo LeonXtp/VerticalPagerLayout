@@ -1,4 +1,4 @@
-package com.leonxtp.fingerview.viewholder;
+package com.leonxtp.fingerview.recycler.viewholder;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -8,14 +8,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.leonxtp.fingerview.DisplayUtil;
+import com.leonxtp.fingerview.util.DisplayUtil;
 
 /**
  * Created by LeonXtp on 2018/12/28 下午10:17
  */
-public class IndicatorViewHolder extends AbsViewHolder {
+public class PagerViewHolder extends AbsViewHolder {
 
-    public IndicatorViewHolder(View itemView) {
+    public PagerViewHolder(View itemView) {
         super(itemView);
     }
 
@@ -23,11 +23,11 @@ public class IndicatorViewHolder extends AbsViewHolder {
 
         TextView textView = new TextView(context);
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                (int) DisplayUtil.dpToPixel(330, context));
+                (int) DisplayUtil.dpToPixel(400, context));
         textView.setLayoutParams(layoutParams);
-        textView.setText("IndicatorViewHolder");
+        textView.setText("PagerViewHolder");
         textView.setGravity(Gravity.CENTER);
-        textView.setBackgroundColor(Color.parseColor("#123210"));
+        textView.setBackgroundColor(Color.parseColor("#456789"));
 
         return textView;
     }

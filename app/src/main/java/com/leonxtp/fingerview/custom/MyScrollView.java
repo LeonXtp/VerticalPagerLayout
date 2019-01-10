@@ -1,10 +1,12 @@
-package com.leonxtp.fingerview;
+package com.leonxtp.fingerview.custom;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.ScrollView;
+
+import com.leonxtp.fingerview.util.Logger;
 
 /**
  * Created by LeonXtp on 2018/12/28 下午9:01
@@ -38,7 +40,7 @@ public class MyScrollView extends ScrollView {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         // Don't do anything with intercepted touch events if
         // we are not scrollable
-        boolean intercept = mScrollable && super.onInterceptTouchEvent(ev);
+        boolean intercept = mScrollable /* && super.onInterceptTouchEvent(ev)*/;
         Logger.d(TAG, "onInterceptTouchEvent: " + intercept);
         return intercept;
     }
@@ -50,22 +52,24 @@ public class MyScrollView extends ScrollView {
         int action = ev.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                Logger.d(TAG, "ACTION_DOWN");
+                Logger.d(TAG, "onTouchEvent ACTION_DOWN");
                 // if we can scroll pass the event to the superclass
                 return mScrollable && super.onTouchEvent(ev);
             case MotionEvent.ACTION_MOVE:
-                Logger.d(TAG, "ACTION_MOVE");
+                Logger.d(TAG, "onTouchEvent ACTION_MOVE");
                 break;
             case MotionEvent.ACTION_CANCEL:
-                Logger.d(TAG, "ACTION_CANCEL");
+                Logger.d(TAG, "onTouchEvent ACTION_CANCEL");
                 break;
             case MotionEvent.ACTION_UP:
-                Logger.d(TAG, "ACTION_UP");
+                Logger.d(TAG, "onTouchEvent ACTION_UP");
                 break;
             default:
                 break;
         }
-        return super.onTouchEvent(ev);
+        boolean touchHandled = super.onTouchEvent(ev);
+        Logger.d(TAG, "touchHandled: " + touchHandled);
+        return true;
     }
 
 }

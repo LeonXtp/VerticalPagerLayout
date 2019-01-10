@@ -1,15 +1,15 @@
-package com.leonxtp.fingerview;
+package com.leonxtp.fingerview.recycler;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import com.leonxtp.fingerview.viewholder.AbsViewHolder;
-import com.leonxtp.fingerview.viewholder.AdsViewHolder;
-import com.leonxtp.fingerview.viewholder.IndicatorViewHolder;
-import com.leonxtp.fingerview.viewholder.ManageViewHolder;
-import com.leonxtp.fingerview.viewholder.PagerViewHolder;
+import com.leonxtp.fingerview.recycler.viewholder.AbsViewHolder;
+import com.leonxtp.fingerview.recycler.viewholder.AdsViewHolder;
+import com.leonxtp.fingerview.recycler.viewholder.IndicatorViewHolder;
+import com.leonxtp.fingerview.recycler.viewholder.ManageViewHolder;
+import com.leonxtp.fingerview.recycler.viewholder.PagerViewHolder;
 
 /**
  * Created by LeonXtp on 2018/12/28 下午9:43
