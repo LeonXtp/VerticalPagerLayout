@@ -10,7 +10,7 @@ import com.leonxtp.fingerview.util.Logger;
 
 /**
  * Created by LeonXtp on 2018/12/28 下午9:01
- * 不能自己上下华滑动的ScrollView
+ * 不能自己上下华滑动的ScrollView， 作为最顶层的父容器
  */
 public class MyScrollView extends ScrollView {
 
@@ -40,7 +40,7 @@ public class MyScrollView extends ScrollView {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         // Don't do anything with intercepted touch events if
         // we are not scrollable
-        boolean intercept = mScrollable /* && super.onInterceptTouchEvent(ev)*/;
+        boolean intercept = mScrollable && super.onInterceptTouchEvent(ev);
         Logger.d(TAG, "onInterceptTouchEvent: " + intercept);
         return intercept;
     }
@@ -54,7 +54,7 @@ public class MyScrollView extends ScrollView {
             case MotionEvent.ACTION_DOWN:
                 Logger.d(TAG, "onTouchEvent ACTION_DOWN");
                 // if we can scroll pass the event to the superclass
-                return mScrollable && super.onTouchEvent(ev);
+                break;
             case MotionEvent.ACTION_MOVE:
                 Logger.d(TAG, "onTouchEvent ACTION_MOVE");
                 break;
@@ -67,9 +67,7 @@ public class MyScrollView extends ScrollView {
             default:
                 break;
         }
-        boolean touchHandled = super.onTouchEvent(ev);
-        Logger.d(TAG, "touchHandled: " + touchHandled);
-        return true;
+        return mScrollable && super.onTouchEvent(ev);
     }
 
 }

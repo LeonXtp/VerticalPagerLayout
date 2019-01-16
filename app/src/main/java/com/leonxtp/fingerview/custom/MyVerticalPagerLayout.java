@@ -16,16 +16,6 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
     private final String TAG = getClass().getSimpleName();
 
-    private boolean mScrollable = true;
-
-    public void setScrollingEnabled(boolean enabled) {
-        mScrollable = enabled;
-    }
-
-    public boolean isScrollable() {
-        return mScrollable;
-    }
-
     public MyVerticalPagerLayout(Context context) {
         super(context);
     }
@@ -53,6 +43,7 @@ public class MyVerticalPagerLayout extends LinearLayout {
                 intercept = false;
                 previousTouchX = ev.getX();
                 previousTouchY = ev.getY();
+
                 break;
             case MotionEvent.ACTION_MOVE:
 
@@ -90,8 +81,7 @@ public class MyVerticalPagerLayout extends LinearLayout {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 Logger.w(TAG, "onTouchEvent ACTION_DOWN");
-                // if we can scroll pass the event to the superclass
-                return false;
+                break;
             case MotionEvent.ACTION_MOVE:
                 Logger.w(TAG, "onTouchEvent ACTION_MOVE");
                 break;
@@ -105,9 +95,9 @@ public class MyVerticalPagerLayout extends LinearLayout {
                 break;
         }
 
-        boolean touchHandled = super.onTouchEvent(ev);
-        Logger.w(TAG, "touchHandled: " + touchHandled);
-        return touchHandled;
+        return true;
     }
+
+
 
 }
