@@ -1,7 +1,11 @@
-package com.leonxtp.fingerview;
+package com.leonxtp.fingerview.util;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Rect;
 import android.util.DisplayMetrics;
+import android.view.Window;
 
 /**
  * Created by LeonXtp on 2018/12/28 下午11:12
@@ -28,6 +32,21 @@ public class DisplayUtil {
      */
     public static float pixelsToDp(float px, Context context) {
         return px / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    public static int statusbarHeight(Activity activity) {
+        Rect rectangle = new Rect();
+        Window window = activity.getWindow();
+        window.getDecorView().getWindowVisibleDisplayFrame(rectangle);
+        return rectangle.top;
+    }
+
+    public static int screenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int screenHeight() {
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
 }

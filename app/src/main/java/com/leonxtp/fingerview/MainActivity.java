@@ -1,15 +1,18 @@
 package com.leonxtp.fingerview;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.github.rubensousa.gravitysnaphelper.GravityPagerSnapHelper;
+import com.leonxtp.fingerview.recycler.PagerViewAdapter;
+import com.leonxtp.fingerview.util.DisplayUtil;
+import com.leonxtp.fingerview.util.Logger;
+import com.leonxtp.fingerview2.R;
 
 import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
 
@@ -36,17 +39,22 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {
-//                mRecyclerView.smoothScrollBy(0, (int) DisplayUtil.dpToPixel(350f, MainActivity.this));
-//                mRecyclerView.smoothScrollToPosition(2);
 
-                RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(1);
-                if (holder != null) {
-//                    holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, 1));
-                    adapter.removeSecondItem();
-                }
+
+                mRecyclerView.smoothScrollBy(0, (int) DisplayUtil.dpToPixel(350f, MainActivity.this));
+                mRecyclerView.smoothScrollToPosition(2);
+
+                startActivity(new Intent(MainActivity.this, CustomActivity.class));
+
+//                RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(1);
+//                if (holder != null) {
+//                    holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams
+// .MATCH_PARENT, 0));
+//                    adapter.notifyItemChanged(1);
+//                }
 
             }
-        }, 2000);
+        }, 300);
 
         mRecyclerView.postDelayed(new Runnable() {
             @Override
@@ -56,7 +64,8 @@ public class MainActivity extends AppCompatActivity {
 
                 RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(1);
                 if (holder != null) {
-//                    holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, 1));
+//                    holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams
+// .MATCH_PARENT, 1));
                     adapter.resumeSecondItem();
                 }
 

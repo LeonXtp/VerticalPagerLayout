@@ -1,4 +1,4 @@
-package com.leonxtp.fingerview;
+package com.leonxtp.fingerview.util;
 
 import android.util.Log;
 
