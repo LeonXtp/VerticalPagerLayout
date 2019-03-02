@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.leonxtp.fingerview.custom.MyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/my_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="600dp">
@@ -14,20 +14,20 @@
             android:id="@+id/view_top"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:background="#ff6083" />
+            android:background="#e2b2bd" />
 
         <View
             android:id="@+id/view_middle"
             android:layout_width="match_parent"
             android:layout_height="150dp"
-            android:background="#009be6" />
+            android:background="#98bdcf" />
 
         <View
             android:id="@+id/view_bottom"
             android:layout_width="match_parent"
             android:layout_height="600dp"
-            android:background="#93ff03" />
+            android:background="#cee9aa" />
 
     </com.leonxtp.fingerview.custom.MyVerticalPagerLayout>
 
-</com.leonxtp.fingerview.custom.MyScrollView>
+</LinearLayout>

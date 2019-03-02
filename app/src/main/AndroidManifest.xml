@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.leonxtp.fingerview2">
+    package="com.leonxtp.fingerview">
 
     <application
         android:allowBackup="true"
@@ -9,14 +9,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.leonxtp.fingerview.MainActivity">
+        <activity android:name=".CustomActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CustomActivity"></activity>
+        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>

@@ -10,7 +10,7 @@ import com.leonxtp.fingerview.util.Logger;
 
 /**
  * Created by LeonXtp on 2018/12/28 下午9:01
- * 不能自己上下华滑动的ScrollView， 作为最顶层的父容器
+ * 不能自己上下滑动的ScrollView， 作为最顶层的父容器
  */
 public class MyScrollView extends ScrollView {
 

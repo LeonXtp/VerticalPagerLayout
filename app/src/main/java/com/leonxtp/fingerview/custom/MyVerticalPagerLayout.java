@@ -49,15 +49,22 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
                 Logger.w(TAG, "onInterceptTouchEvent ACTION_MOVE");
 
-                float moveX = Math.abs(ev.getX() - previousTouchX);
-                float moveY = Math.abs(ev.getY() - previousTouchY);
+                float moveX = ev.getX() - previousTouchX;
+                float moveY = ev.getY() - previousTouchY;
+
+                Logger.w(TAG, "moveX: " + moveX);
+                Logger.w(TAG, "moveY: " + moveY);
 
                 previousTouchX = ev.getX();
                 previousTouchY = ev.getY();
 
-                if (moveY > moveX) {
+                if (Math.abs(moveY) > Math.abs(moveX)) {
+                    Logger.w(TAG, "onTouchEvent move vertically");
                     intercept = true;
+                } else {
+                    Logger.w(TAG, "onTouchEvent move horizontally");
                 }
+
 
                 break;
             case MotionEvent.ACTION_CANCEL:
@@ -80,10 +87,32 @@ public class MyVerticalPagerLayout extends LinearLayout {
         int action = ev.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+
                 Logger.w(TAG, "onTouchEvent ACTION_DOWN");
+
+                previousTouchX = ev.getX();
+                previousTouchY = ev.getY();
+
                 break;
             case MotionEvent.ACTION_MOVE:
                 Logger.w(TAG, "onTouchEvent ACTION_MOVE");
+
+                float moveX = ev.getX() - previousTouchX;
+                float moveY = ev.getY() - previousTouchY;
+
+                Logger.w(TAG, "moveX: " + moveX);
+                Logger.w(TAG, "moveY: " + moveY);
+
+                previousTouchX = ev.getX();
+                previousTouchY = ev.getY();
+
+                if (Math.abs(moveY) > Math.abs(moveX)) {
+                    Logger.w(TAG, "onTouchEvent move vertically");
+                    onMoveVertical(moveY);
+                } else {
+                    Logger.w(TAG, "onTouchEvent move horizontally");
+                }
+
                 break;
             case MotionEvent.ACTION_CANCEL:
                 Logger.w(TAG, "onTouchEvent ACTION_CANCEL");
@@ -98,6 +127,13 @@ public class MyVerticalPagerLayout extends LinearLayout {
         return true;
     }
 
+    private void onMoveVertical(float moveY) {
+        scrollBy(0, -(int) moveY);
+    }
 
+
+    private void onActionUp() {
+
+    }
 
 }

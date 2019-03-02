@@ -3,13 +3,9 @@ package com.leonxtp.fingerview;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.leonxtp.fingerview.custom.MyScrollView;
 import com.leonxtp.fingerview.custom.MyVerticalPagerLayout;
-import com.leonxtp.fingerview.util.DisplayUtil;
 
 public class CustomActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -21,8 +17,8 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void initView() {
-        MyScrollView myScrollView = findViewById(R.id.my_scroll_view);
-        myScrollView.setScrollingEnabled(false);
+//        MyScrollView myScrollView = findViewById(R.id.my_scroll_view);
+//        myScrollView.setScrollingEnabled(false);
 
         MyVerticalPagerLayout verticalPagerLayout = findViewById(R.id.vertical_pager_layout);
 

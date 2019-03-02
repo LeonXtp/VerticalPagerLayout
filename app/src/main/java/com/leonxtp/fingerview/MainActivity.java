@@ -12,7 +12,6 @@ import com.github.rubensousa.gravitysnaphelper.GravityPagerSnapHelper;
 import com.leonxtp.fingerview.recycler.PagerViewAdapter;
 import com.leonxtp.fingerview.util.DisplayUtil;
 import com.leonxtp.fingerview.util.Logger;
-import com.leonxtp.fingerview2.R;
 
 import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
 

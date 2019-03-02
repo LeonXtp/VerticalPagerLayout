@@ -29,4 +29,5 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.github.rubensousa:gravitysnaphelper:1.5'
     implementation 'me.everything:overscroll-decor-android:1.0.4'
+
 }
