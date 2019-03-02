@@ -11,6 +11,9 @@ import com.leonxtp.fingerview.viewholder.IndicatorViewHolder;
 import com.leonxtp.fingerview.viewholder.ManageViewHolder;
 import com.leonxtp.fingerview.viewholder.PagerViewHolder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by LeonXtp on 2018/12/28 下午9:43
  */
@@ -25,6 +28,20 @@ public class PagerViewAdapter extends RecyclerView.Adapter<AbsViewHolder> {
 
     public PagerViewAdapter(Context context) {
         this.mContext = context;
+    }
+
+    private int itemCount = 4;
+
+    public void removeSecondItem() {
+        itemCount = 3;
+//        notifyItemRemoved(2);
+        notifyDataSetChanged();
+    }
+
+    public void resumeSecondItem() {
+        itemCount = 4;
+//        notifyItemInserted(2);
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -49,12 +66,25 @@ public class PagerViewAdapter extends RecyclerView.Adapter<AbsViewHolder> {
 
     @Override
     public int getItemCount() {
-        return 4;
+        return itemCount;
     }
 
     @Override
     public int getItemViewType(int position) {
-        return position;
+        if (itemCount == 4) {
+            return position;
+        } else {
+            switch (position) {
+                case 0:
+                    return TYPE_MANAGE;
+                case 1:
+                    return TYPE_VIEWPAGER;
+                case 2:
+                    return TYPE_INDICATOR;
+                default:
+                    return 0;
+            }
+        }
     }
 
 }

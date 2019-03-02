@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,21 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(adapter);
         new GravityPagerSnapHelper(Gravity.TOP).attachToRecyclerView(mRecyclerView);
         OverScrollDecoratorHelper.setUpOverScroll(mRecyclerView, OverScrollDecoratorHelper.ORIENTATION_VERTICAL);
+        ((SimpleItemAnimator) mRecyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+        mRecyclerView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+//                mRecyclerView.smoothScrollBy(0, (int) DisplayUtil.dpToPixel(350f, MainActivity.this));
+//                mRecyclerView.smoothScrollToPosition(2);
+
+                RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(1);
+                if (holder != null) {
+//                    holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, 1));
+                    adapter.removeSecondItem();
+                }
+
+            }
+        }, 2000);
 
         mRecyclerView.postDelayed(new Runnable() {
             @Override
@@ -40,12 +56,12 @@ public class MainActivity extends AppCompatActivity {
 
                 RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(1);
                 if (holder != null) {
-                    holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, 0));
-                    adapter.notifyItemChanged(1);
+//                    holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, 1));
+                    adapter.resumeSecondItem();
                 }
 
             }
-        }, 2000);
+        }, 4000);
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
