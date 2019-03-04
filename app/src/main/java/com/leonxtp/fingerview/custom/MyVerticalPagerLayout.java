@@ -280,6 +280,7 @@ public class MyVerticalPagerLayout extends LinearLayout {
     public void computeScroll() {
         super.computeScroll();
 
+        // 在mScroller没有startScroll的时候，它也会执行
         if (!mScroller.computeScrollOffset()) {
             return;
         }
@@ -287,16 +288,19 @@ public class MyVerticalPagerLayout extends LinearLayout {
         final int oldY = getScrollY();
         final int currY = mScroller.getCurrY();
         final int finalY = mScroller.getFinalY();
-        Logger.d(TAG, "computeScroll: oldY = " + oldY + ", currY = " + currY + ", finalY = " + finalY);
+        Logger.d(TAG, "computeScroll: oldY = " + oldY + ", currY = " + currY + ", finalY = " + finalY +
+                ", isFinished = " + mScroller.isFinished());
 
+        // 存在currY == finalY，但是isFinished = false，这时候还会继续调用1～2次computeScroll()的情况
         if (!mScroller.isFinished() || oldY != currY || currY != finalY) {
             scrollTo(0, currY);
             postInvalidateOnAnimation();
-        } else {
-            mIsBeingDragged = false;
-            Logger.d(TAG, "computeScroll finished, mIsBeingDragged = false. ");
         }
 
+        if (mScroller.isFinished()) {
+            mIsBeingDragged = false;
+            Logger.d(TAG, "mScroller.isFinished(), mIsBeingDragged = false. ");
+        }
     }
 
 }
