@@ -2,8 +2,6 @@ package com.leonxtp.fingerview.custom;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,6 +17,15 @@ import java.util.List;
 /**
  * Created by LeonXtp on 2018/12/28 下午9:01
  * 垂直方向的、Page大小任意的PagerLayout
+ * <p>
+ * 1。 拖动、松开、立即按下问题：
+ * 情形1：一只手按住，滑动，然后另一只手指按下，这时，前一只手指抬起，View出现快速变动
+ * 情形2：一只手按住，滑动，然后另一只手指按下滑动，这时，前一只手指轻触屏幕
+ * 都出现View跳动都情况
+ * 原因：
+ * 多点触碰引起的ACTION_MOVE的eventY因手指变化出现跳动
+ * 解决：
+ * 在多点触碰事件触发的时候，下一次ACTION_MOVE事件忽略
  */
 public class MyVerticalPagerLayout extends LinearLayout {
 
@@ -39,6 +46,13 @@ public class MyVerticalPagerLayout extends LinearLayout {
     // 回弹时，是否可跨越子View
     private boolean isOverMovable = false;
 
+    // 自然状态下，View在自动滚动过程中，再次点按屏幕，滚动过程将不会停下，
+    // 需要在自动滚动过程中，继续处理ACTION_DOWN事件，拦截余下事件
+    private boolean mIsBeingDragged = false;
+
+    // 当ACTION_POINTER_DOWN 或者 ACTION_POINTER_UP事件触发时，将忽略下一次Move事件
+    private boolean isPointerActionTriggered = false;
+
     private List<Integer> mChildHeightsList = new ArrayList<>();
     // 内容View的高度
     private int mContentHeight = 0;
@@ -46,7 +60,7 @@ public class MyVerticalPagerLayout extends LinearLayout {
     private int mScrollableHeight = 0;
     // 上次停留状态的y方向偏移
     private int lastStayScrollY = 0;
-
+    // View滑动超出本身的滑动范围时，弹性效果的阻尼系数
     private static final float OVER_SCROLL_DAMPING_COEFFICIENT = 0.2f;
 
     private void init(Context context) {
@@ -88,10 +102,13 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
                 Logger.w(TAG, "onInterceptTouchEvent ACTION_DOWN");
 
-                intercept = false;
+                intercept = mIsBeingDragged;
                 previousTouchX = ev.getX();
                 previousTouchY = ev.getY();
 
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                Logger.w(TAG, "onInterceptTouchEvent ACTION_POINTER_DOWN");
                 break;
             case MotionEvent.ACTION_MOVE:
 
@@ -100,7 +117,6 @@ public class MyVerticalPagerLayout extends LinearLayout {
                 float moveX = previousTouchX - ev.getX();
                 float moveY = previousTouchY - ev.getY();
 
-                Logger.w(TAG, "moveX: " + moveX);
                 Logger.w(TAG, "moveY: " + moveY);
 
                 previousTouchX = ev.getX();
@@ -120,6 +136,9 @@ public class MyVerticalPagerLayout extends LinearLayout {
             case MotionEvent.ACTION_UP:
                 Logger.w(TAG, "onInterceptTouchEvent ACTION_UP");
                 intercept = false;
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                Logger.w(TAG, "onInterceptTouchEvent ACTION_POINTER_UP");
                 break;
             default:
                 break;
@@ -141,6 +160,12 @@ public class MyVerticalPagerLayout extends LinearLayout {
                 previousTouchX = ev.getX();
                 previousTouchY = ev.getY();
 
+                onActionDown();
+
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                isPointerActionTriggered = true;
+                Logger.w(TAG, "onTouchEvent ACTION_POINTER_DOWN");
                 break;
             case MotionEvent.ACTION_MOVE:
                 Logger.w(TAG, "onTouchEvent ACTION_MOVE");
@@ -148,7 +173,6 @@ public class MyVerticalPagerLayout extends LinearLayout {
                 float moveX = previousTouchX - ev.getX();
                 float moveY = previousTouchY - ev.getY();
 
-                Logger.w(TAG, "moveX: " + moveX);
                 Logger.w(TAG, "moveY: " + moveY);
 
                 previousTouchX = ev.getX();
@@ -156,9 +180,12 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
                 if (Math.abs(moveY) > Math.abs(moveX)) {
                     Logger.w(TAG, "onTouchEvent move vertically");
-                    onMoveVertical(moveY);
-                } else {
-                    Logger.w(TAG, "onTouchEvent move horizontally");
+                    mIsBeingDragged = true;
+                    Logger.d(TAG, "onTouchEvent moving mIsBeingDragged = true");
+                    if (!isPointerActionTriggered) {
+                        onMoveVertical(moveY);
+                    }
+                    isPointerActionTriggered = false;
                 }
 
                 break;
@@ -168,6 +195,10 @@ public class MyVerticalPagerLayout extends LinearLayout {
                 Logger.w(TAG, "onTouchEvent ACTION_UP");
                 onActionUp();
                 break;
+            case MotionEvent.ACTION_POINTER_UP:
+                isPointerActionTriggered = true;
+                Logger.w(TAG, "onTouchEvent ACTION_POINTER_UP");
+                break;
             default:
                 break;
         }
@@ -176,7 +207,10 @@ public class MyVerticalPagerLayout extends LinearLayout {
     }
 
     private void onActionDown() {
-
+        if (!mScroller.isFinished()) {
+            Logger.d(TAG, "onActionDown, mScroller.abortAnimation()");
+            mScroller.abortAnimation();
+        }
     }
 
     /**
@@ -185,6 +219,7 @@ public class MyVerticalPagerLayout extends LinearLayout {
      * @param moveY 手指滑动的距离，向上为+， 向下为-。
      */
     private void onMoveVertical(float moveY) {
+
         int scrollY = getScrollY();
         Logger.d(TAG, "onMoveVertical, scrollY = " + scrollY + ", moveY = " + moveY);
         if (getScrollY() <= 0 && moveY < 0) {// 下拉超出
@@ -206,8 +241,14 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
     private void onActionUp() {
         int dy = computeAutoScrollDy();
-        mScroller.startScroll(0, getScrollY(), 0, dy, 300);
-        postInvalidateOnAnimation();
+        if (dy == 0) {
+            mIsBeingDragged = false;
+            Logger.d(TAG, "onActionUp...mIsBeingDragged = false");
+        } else {
+            Logger.d(TAG, "startScroll...dy = " + dy);
+            mScroller.startScroll(0, getScrollY(), 0, dy, 300);
+            postInvalidateOnAnimation();
+        }
     }
 
     private int computeAutoScrollDy() {
@@ -245,19 +286,21 @@ public class MyVerticalPagerLayout extends LinearLayout {
     public void computeScroll() {
         super.computeScroll();
 
-        if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
+        if (!mScroller.computeScrollOffset()) {
+            return;
+        }
 
-            final int oldY = getScrollY();
-            final int y = mScroller.getCurrY();
-            final int finalY = mScroller.getFinalY();
-            Logger.d(TAG, "computeScroll: oldY = " + oldY + ", currY = " + y + ", finalY = " + finalY);
+        final int oldY = getScrollY();
+        final int currY = mScroller.getCurrY();
+        final int finalY = mScroller.getFinalY();
+        Logger.d(TAG, "computeScroll: oldY = " + oldY + ", currY = " + currY + ", finalY = " + finalY);
 
-            if (oldY != y || oldY != finalY) {
-                scrollTo(0, y);
-                postInvalidateOnAnimation();
-            }
+        if (!mScroller.isFinished() || oldY != currY || currY != finalY) {
+            scrollTo(0, currY);
+            postInvalidateOnAnimation();
         } else {
-            Logger.d(TAG, "not computeScroll");
+            mIsBeingDragged = false;
+            Logger.d(TAG, "computeScroll finished, mIsBeingDragged = false. ");
         }
 
     }

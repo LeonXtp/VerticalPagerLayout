@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
                 mRecyclerView.smoothScrollBy(0, (int) DisplayUtil.dpToPixel(350f, MainActivity.this));
                 mRecyclerView.smoothScrollToPosition(2);
 
-                startActivity(new Intent(MainActivity.this, CustomActivity.class));
+//                startActivity(new Intent(MainActivity.this, CustomActivity.class));
 
 //                RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(1);
 //                if (holder != null) {
