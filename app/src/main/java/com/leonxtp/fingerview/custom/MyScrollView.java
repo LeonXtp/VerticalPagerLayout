@@ -12,6 +12,7 @@ import com.leonxtp.fingerview.util.Logger;
  * Created by LeonXtp on 2018/12/28 下午9:01
  * 不能自己上下滑动的ScrollView， 作为最顶层的父容器
  */
+@Deprecated
 public class MyScrollView extends ScrollView {
 
     private final String TAG = getClass().getSimpleName();
