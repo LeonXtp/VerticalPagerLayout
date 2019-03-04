@@ -107,9 +107,6 @@ public class MyVerticalPagerLayout extends LinearLayout {
                 previousTouchY = ev.getY();
 
                 break;
-            case MotionEvent.ACTION_POINTER_DOWN:
-                Logger.w(TAG, "onInterceptTouchEvent ACTION_POINTER_DOWN");
-                break;
             case MotionEvent.ACTION_MOVE:
 
                 Logger.w(TAG, "onInterceptTouchEvent ACTION_MOVE");
@@ -137,9 +134,6 @@ public class MyVerticalPagerLayout extends LinearLayout {
                 Logger.w(TAG, "onInterceptTouchEvent ACTION_UP");
                 intercept = false;
                 break;
-            case MotionEvent.ACTION_POINTER_UP:
-                Logger.w(TAG, "onInterceptTouchEvent ACTION_POINTER_UP");
-                break;
             default:
                 break;
         }
@@ -156,6 +150,7 @@ public class MyVerticalPagerLayout extends LinearLayout {
             case MotionEvent.ACTION_DOWN:
 
                 Logger.w(TAG, "onTouchEvent ACTION_DOWN");
+                isPointerActionTriggered = false;
 
                 previousTouchX = ev.getX();
                 previousTouchY = ev.getY();
@@ -280,7 +275,6 @@ public class MyVerticalPagerLayout extends LinearLayout {
             return bottomY - scrollY;
         }
     }
-
 
     @Override
     public void computeScroll() {
