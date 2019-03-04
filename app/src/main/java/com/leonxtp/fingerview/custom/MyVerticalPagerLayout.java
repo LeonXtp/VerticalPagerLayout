@@ -36,16 +36,21 @@ public class MyVerticalPagerLayout extends LinearLayout {
         init(context);
     }
 
+    // 回弹时，是否可跨越子View
+    private boolean isOverMovable = false;
+
     private List<Integer> mChildHeightsList = new ArrayList<>();
     // 内容View的高度
     private int mContentHeight = 0;
     // 子view可滚动的高度，如：父view高度100，子View高度加起来200，那么可滚动的区域就是200-100=100
     private int mScrollableHeight = 0;
+    // 上次停留状态的y方向偏移
+    private int lastStayScrollY = 0;
 
     private static final float OVER_SCROLL_DAMPING_COEFFICIENT = 0.2f;
 
     private void init(Context context) {
-        mScroller = new Scroller(context);
+        mScroller = new Scroller(context, new AccelerateDecelerateInterpolator());
     }
 
     @Override
@@ -182,9 +187,9 @@ public class MyVerticalPagerLayout extends LinearLayout {
     private void onMoveVertical(float moveY) {
         int scrollY = getScrollY();
         Logger.d(TAG, "onMoveVertical, scrollY = " + scrollY + ", moveY = " + moveY);
-        if (getScrollY() <= 0 && moveY < 0) {
+        if (getScrollY() <= 0 && moveY < 0) {// 下拉超出
             onMoveOverScroll(moveY);
-        } else if (mScrollableHeight >= 0 && getScrollY() >= mScrollableHeight && moveY > 0) {
+        } else if (mScrollableHeight >= 0 && getScrollY() >= mScrollableHeight && moveY > 0) {// 上拉超出
             onMoveOverScroll(moveY);
         } else {
             onMoveInside(moveY);
@@ -200,9 +205,41 @@ public class MyVerticalPagerLayout extends LinearLayout {
     }
 
     private void onActionUp() {
-        mScroller.startScroll(0, getScrollY(), 0, -getScrollY(), 200);
+        int dy = computeAutoScrollDy();
+        mScroller.startScroll(0, getScrollY(), 0, dy, 300);
         postInvalidateOnAnimation();
     }
+
+    private int computeAutoScrollDy() {
+
+        if (getScrollY() < 0) {// 下拉超出
+            return -getScrollY();
+        } else if (mScrollableHeight > 0 && getScrollY() > mScrollableHeight) {// 上拉超出
+            return -(getScrollY() - mScrollableHeight);
+        } else {
+            return computeAutoScrollDyInside();
+        }
+    }
+
+    private int computeAutoScrollDyInside() {
+        int scrollY = getScrollY();
+        int topY = 0;
+        int bottomY = 0;
+        for (int i = 0; i < mChildHeightsList.size(); i++) {
+            bottomY += mChildHeightsList.get(i);
+            if (scrollY <= bottomY) {
+                break;
+            }
+            topY = bottomY;
+        }
+
+        if (scrollY - topY < (bottomY - topY) / 2) {// 不到一半，需要回弹
+            return topY - scrollY;
+        } else { // 等于或超过一半， 需要进击
+            return bottomY - scrollY;
+        }
+    }
+
 
     @Override
     public void computeScroll() {
@@ -210,16 +247,13 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
         if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
 
-            final int oldX = getScrollX();
             final int oldY = getScrollY();
-            final int x = mScroller.getCurrX();
             final int y = mScroller.getCurrY();
+            final int finalY = mScroller.getFinalY();
+            Logger.d(TAG, "computeScroll: oldY = " + oldY + ", currY = " + y + ", finalY = " + finalY);
 
-            Logger.d(TAG, "computeScroll: " + y);
-            if (oldX != x || oldY != y) {
-                scrollTo(x, y);
-
-                // Keep on drawing until the animation has finished.
+            if (oldY != y || oldY != finalY) {
+                scrollTo(0, y);
                 postInvalidateOnAnimation();
             }
         } else {

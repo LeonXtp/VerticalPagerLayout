@@ -17,6 +17,13 @@
             android:background="#e2b2bd" />
 
         <View
+            android:id="@+id/view_top2"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#ef1804"
+            android:visibility="gone" />
+
+        <View
             android:id="@+id/view_middle"
             android:layout_width="match_parent"
             android:layout_height="150dp"
@@ -25,8 +32,27 @@
         <View
             android:id="@+id/view_bottom"
             android:layout_width="match_parent"
-            android:layout_height="600dp"
+            android:layout_height="200dp"
             android:background="#cee9aa" />
+
+        <View
+            android:id="@+id/view_bottom2"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#e9d7aa" />
+
+        <View
+            android:id="@+id/view_bottom3"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#8c7ec6" />
+
+        <View
+            android:id="@+id/view_bottom4"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#7ec6c2" />
+
 
     </com.leonxtp.fingerview.custom.MyVerticalPagerLayout>
 
