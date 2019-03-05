@@ -10,6 +10,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.Scroller;
 
+import com.leonxtp.fingerview.custom.util.ComputeUtil;
 import com.leonxtp.fingerview.util.Logger;
 
 import java.util.ArrayList;
@@ -72,6 +73,12 @@ public class MyVerticalPagerLayout extends LinearLayout {
      */
     private int lastStayScrollY = 0;
     /**
+     * 上次选中的itemIndex，目的：
+     * 1。防止当前显示的item没有变化时，一点微小的滑动也会回调{@link OnItemScrollListener#onItemSelected(View, int)}
+     * 2。
+     */
+    private int mLastSelectedItemIndex = 0;
+    /**
      * View滑动超出本身的滑动范围时，弹性效果的阻尼系数
      */
     private static final float OVER_SCROLL_DAMPING_COEFFICIENT = 0.2f;
@@ -96,12 +103,6 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
     public void removeScrollListener() {
         this.mOnItemScrollListener = null;
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        Logger.d(TAG, "onMeasure");
     }
 
     @Override
@@ -255,17 +256,10 @@ public class MyVerticalPagerLayout extends LinearLayout {
      * @param moveY 手指滑动的距离，向上为+， 向下为-。
      */
     private void onMoveVertical(float moveY) {
-
         int scrollY = getScrollY();
         Logger.d(TAG, "onMoveVertical, scrollY = " + scrollY + ", moveY = " + moveY);
-        if (getScrollY() <= 0 && moveY < 0) {
-            // 下拉超出
-            onMoveOverScroll(moveY);
-        } else if (mScrollableHeight >= 0 && getScrollY() >= mScrollableHeight && moveY > 0) {
-            // 上拉超出
-            onMoveOverScroll(moveY);
-        } else if (mScrollableHeight < 0) {
-            // 子View高度都不够填充满父View，不给他弹性回弹效果了
+        if (ComputeUtil.isMoveOverScroll(scrollY, moveY, mScrollableHeight)) {
+            // 需要加阻尼
             onMoveOverScroll(moveY);
         } else {
             onMoveInside(moveY);
@@ -283,57 +277,13 @@ public class MyVerticalPagerLayout extends LinearLayout {
     }
 
     private void onActionUp() {
-        int dy = computeAutoScrollDy();
+        int dy = ComputeUtil.computeAutoScrollDy(getScrollY(), mChildHeightsList, mScrollableHeight);
         if (dy == 0) {
             onAutoScrollFinished();
         } else {
             Logger.d(TAG, "startScroll...dy = " + dy);
             mScroller.startScroll(0, getScrollY(), 0, dy, 300);
             postInvalidateOnAnimation();
-        }
-    }
-
-    private int computeAutoScrollDy() {
-
-        if (getScrollY() < 0) {
-            // 下拉超出
-            return -getScrollY();
-        } else if (mScrollableHeight > 0 && getScrollY() > mScrollableHeight) {
-            // 上拉超出，且内容高度超过父容器高度
-            return -(getScrollY() - mScrollableHeight);
-        } else if (mScrollableHeight < 0 && getScrollY() > 0) {
-            // 上拉超出，且内容高度小于父容器高度
-            return -getScrollY();
-        } else {
-            return computeAutoScrollDyInside();
-        }
-    }
-
-    /**
-     * 计算手指松开后的自动滚动距离
-     * 这里在看第一个可见View是否超过了一半的同时，也要看最后一个View是否已经到底了
-     */
-    private int computeAutoScrollDyInside() {
-        int scrollY = getScrollY();
-        int topY = 0;
-        int bottomY = 0;
-        for (int i = 0; i < mChildHeightsList.size(); i++) {
-            bottomY += mChildHeightsList.get(i);
-            if (scrollY <= bottomY) {
-                break;
-            }
-            topY = bottomY;
-        }
-
-        if (scrollY - topY < (bottomY - topY) / 2) {
-            // 不到一半，需要回弹
-            return topY - scrollY;
-        } else if (bottomY > mScrollableHeight) {
-            // 等于或超过一半， 并且最后一个子View已经到底，否则将进击过多，导致底部空白
-            return mScrollableHeight - scrollY;
-        } else {
-            // 等于或超过一半， 并且最后一个子View没有到底
-            return bottomY - scrollY;
         }
     }
 
@@ -368,7 +318,13 @@ public class MyVerticalPagerLayout extends LinearLayout {
         mIsBeingDragged = false;
         Logger.d(TAG, "mScroller.isFinished(), mIsBeingDragged = false. ");
         if (mOnItemScrollListener != null) {
-            float[] firstVisibleItemInfo = findFirstVisibleItem(getScrollY());
+            float[] firstVisibleItemInfo = ComputeUtil.findFirstVisibleItem(mChildHeightsList, getScrollY());
+            int firstVisibleItemIndex = (int) firstVisibleItemInfo[0];
+            if (firstVisibleItemIndex == mLastSelectedItemIndex) {
+                // 防止itemIndex没有变化时多次回调
+                return;
+            }
+            mLastSelectedItemIndex = firstVisibleItemIndex;
             mOnItemScrollListener.onItemSelected(getChildAt((int) firstVisibleItemInfo[0]),
                     (int) firstVisibleItemInfo[0]);
         }
@@ -395,36 +351,12 @@ public class MyVerticalPagerLayout extends LinearLayout {
         }
 
         if (mOnItemScrollListener != null) {
-            float[] firstVisibleItemInfo = findFirstVisibleItem(currY);
-            mOnItemScrollListener.onItemScrolled(getChildAt((int) firstVisibleItemInfo[0]),
-                    (int) firstVisibleItemInfo[0], firstVisibleItemInfo[1]);
+            float[] firstVisibleItemInfo = ComputeUtil.findFirstVisibleItem(mChildHeightsList, currY);
+            int firstVisibleItemIndex = (int) firstVisibleItemInfo[0];
+            mOnItemScrollListener.onItemScrolled(getChildAt(firstVisibleItemIndex),
+                    firstVisibleItemIndex, firstVisibleItemInfo[1]);
         }
     }
 
-    /**
-     * 根据目标scrollY找到所应该显示的第一个子View的index和显示的百分比
-     *
-     * @param targetScrollY 目标scrollY
-     * @return float数组，第0个是第一个显示的子View的下标
-     * 第1个是第一个子View显示高度占其自身高度的百分比，float类型，[0, 1]
-     */
-    private float[] findFirstVisibleItem(int targetScrollY) {
-        float itemIdex = 0;
-        int itemHeight = 0;
-        int bottomY = 0;
-        for (int i = 0; i < mChildHeightsList.size(); i++) {
-            bottomY += mChildHeightsList.get(i);
-            if (targetScrollY < bottomY) {
-                itemIdex = i;
-                itemHeight = mChildHeightsList.get(i);
-                break;
-            }
-        }
-
-        int visibleHeight = bottomY - targetScrollY;
-        float visibleOffset = visibleHeight * 1.0f / itemHeight;
-        return new float[]{itemIdex, visibleOffset};
-
-    }
 
 }
