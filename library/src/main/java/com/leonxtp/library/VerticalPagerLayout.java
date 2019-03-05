@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by LeonXtp on 2018/12/28 下午9:01
+ * Created by LeonXtp on 2019/03/02 下午9:01
  * 垂直方向的、Page大小任意的PagerLayout
  * <p>
  * 1。 拖动、松开、立即按下问题：
@@ -28,18 +28,18 @@ import java.util.List;
  * <p>
  * 2. 全部子View不够父View高度，空白区域为何回调onItemSelected(.., 0)?
  */
-public class MyVerticalPagerLayout extends LinearLayout {
+public class VerticalPagerLayout extends LinearLayout {
 
     private final String TAG = getClass().getSimpleName();
 
     private Scroller mScroller;
 
-    public MyVerticalPagerLayout(Context context) {
+    public VerticalPagerLayout(Context context) {
         super(context);
         init(context);
     }
 
-    public MyVerticalPagerLayout(Context context, AttributeSet attrs) {
+    public VerticalPagerLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
@@ -72,6 +72,7 @@ public class MyVerticalPagerLayout extends LinearLayout {
     private List<Integer> mChildHeightsList = new ArrayList<>();
     /**
      * 子view可滚动的高度，如：父view高度100，子View高度加起来200，那么可滚动的区域就是200-100=100
+     * 当内容View高度不足父容器高度时，此高度=0
      */
     private int mScrollableHeight = 0;
     /**
@@ -104,6 +105,12 @@ public class MyVerticalPagerLayout extends LinearLayout {
         });
     }
 
+    /**
+     * =================================================================================================================
+     * Public Methods Start
+     * =================================================================================================================
+     */
+
     public void addOnScrollListener(OnItemScrollListener listener) {
         this.mOnItemScrollListener = listener;
     }
@@ -116,6 +123,34 @@ public class MyVerticalPagerLayout extends LinearLayout {
         this.isMoveEnabled = movable;
     }
 
+    public void showTopView() {
+        scrollTo(0, 0);
+    }
+
+    public void showBottomView() {
+        if (mScrollableHeight > 0) {
+            scrollTo(0, mScrollableHeight);
+        } else {
+            scrollTo(0, 0);
+        }
+    }
+
+    public void scrollToTop() {
+        smoothScrollBy(-getScrollY());
+    }
+
+    public void scrollToBottom() {
+        if (mScrollableHeight > 0) {
+            smoothScrollBy(mScrollableHeight);
+        }
+    }
+
+    /**
+     * =================================================================================================================
+     * Public Methods End
+     * =================================================================================================================
+     */
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
@@ -126,20 +161,8 @@ public class MyVerticalPagerLayout extends LinearLayout {
     }
 
     private void initChildrenHeights() {
-        mChildHeightsList.clear();
-        int mContentHeight = 0;
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            int childHeight = 0;
-            if (child.getVisibility() == View.VISIBLE) {
-                childHeight = child.getHeight();
-            }
-            mChildHeightsList.add(childHeight);
-            mContentHeight += childHeight;
-            Logger.d(TAG, "child " + i + ", height: " + childHeight);
-        }
-        mScrollableHeight = mContentHeight - getHeight();
-        Logger.d(TAG, "mScrollableHeight = " + mScrollableHeight);
+        int contentHeight = ScrollComputeUtil.initContentHeights(mChildHeightsList, this);
+        mScrollableHeight = contentHeight - getHeight() > 0 ? contentHeight - getHeight() : 0;
     }
 
     private float previousTouchX, previousTouchY;
@@ -292,9 +315,13 @@ public class MyVerticalPagerLayout extends LinearLayout {
             onAutoScrollFinished();
         } else {
             Logger.d(TAG, "startScroll...dy = " + dy);
-            mScroller.startScroll(0, getScrollY(), 0, dy, 300);
-            ViewCompat.postInvalidateOnAnimation(this);
+            smoothScrollBy(dy);
         }
+    }
+
+    private void smoothScrollBy(int dy) {
+        mScroller.startScroll(0, getScrollY(), 0, dy, 300);
+        ViewCompat.postInvalidateOnAnimation(this);
     }
 
     @Override

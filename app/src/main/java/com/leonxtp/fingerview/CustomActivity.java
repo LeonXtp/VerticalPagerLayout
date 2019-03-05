@@ -10,14 +10,14 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.leonxtp.library.Logger;
-import com.leonxtp.library.MyVerticalPagerLayout;
 import com.leonxtp.library.OnItemScrollListener;
+import com.leonxtp.library.VerticalPagerLayout;
 
 public class CustomActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "CustomActivity";
 
-    private MyVerticalPagerLayout verticalPagerLayout;
+    private VerticalPagerLayout verticalPagerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

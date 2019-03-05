@@ -1,5 +1,6 @@
 package com.leonxtp.library;
 
+import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.List;
@@ -8,6 +9,29 @@ import java.util.List;
  * Created by LeonXtp on 2019/3/5 下午3:11
  */
 public class ScrollComputeUtil {
+
+    /**
+     * 初始化所有子View的高度
+     * 注意：暂时不考虑各个子View存在margin的情况
+     *
+     * @param mChildHeightsList 存储子View高度列表的List
+     * @param parent            父容器
+     * @return 所有子View的高度总和
+     */
+    public static int initContentHeights(List<Integer> mChildHeightsList, ViewGroup parent) {
+        mChildHeightsList.clear();
+        int mContentHeight = 0;
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            View child = parent.getChildAt(i);
+            int childHeight = 0;
+            if (child.getVisibility() == View.VISIBLE) {
+                childHeight = child.getHeight();
+            }
+            mChildHeightsList.add(childHeight);
+            mContentHeight += childHeight;
+        }
+        return mContentHeight;
+    }
 
     /**
      * 计算手指松开后自动滚动的距离
@@ -91,17 +115,14 @@ public class ScrollComputeUtil {
      *
      * @param scrollY           父容器的scrollY, 通过{@link ViewGroup#getScrollY()}取得
      * @param moveY             当次{@link android.view.MotionEvent}移动的垂直方向距离
-     * @param mScrollableHeight 父容器高度-所有子View的高度得到的一个可滚动的范围
+     * @param scrollableHeight 父容器高度-所有子View的高度得到的一个可滚动的范围
      */
-    public static boolean isMoveOverScroll(int scrollY, float moveY, int mScrollableHeight) {
+    public static boolean isMoveOverScroll(int scrollY, float moveY, int scrollableHeight) {
         if (scrollY <= 0 && moveY < 0) {
             // 下拉超出
             return true;
-        } else if (mScrollableHeight >= 0 && scrollY >= mScrollableHeight && moveY > 0) {
+        } else if (scrollableHeight >= 0 && scrollY >= scrollableHeight && moveY > 0) {
             // 上拉超出
-            return true;
-        } else if (mScrollableHeight < 0) {
-            // 子View高度都不够填充满父View，直接回弹
             return true;
         } else {
             return false;
