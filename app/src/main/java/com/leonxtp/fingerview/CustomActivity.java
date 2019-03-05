@@ -7,6 +7,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,6 +78,15 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
             textView.setText("Added TextView");
             textView.setBackgroundColor(Color.GRAY);
             ((ViewGroup) findViewById(R.id.vertical_pager_layout)).addView(textView, 2);
+        }
+        if (v.getId() == R.id.view_middle) {
+
+            View scrollView = getLayoutInflater().inflate(R.layout.layout_scroll_content, null);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    450);
+            scrollView.setLayoutParams(layoutParams);
+            ((ViewGroup) findViewById(R.id.vertical_pager_layout)).addView(scrollView, 3);
+
         }
     }
 }
