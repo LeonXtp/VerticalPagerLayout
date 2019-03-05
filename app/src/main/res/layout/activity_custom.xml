@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="600dp">
 
-    <com.leonxtp.fingerview.custom.MyVerticalPagerLayout
+    <com.leonxtp.library.MyVerticalPagerLayout
         android:id="@+id/vertical_pager_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -13,20 +13,20 @@
         <View
             android:id="@+id/view_top"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="20dp"
             android:background="#e2b2bd" />
 
         <View
             android:id="@+id/view_top2"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="20dp"
             android:background="#ef1804"
             android:visibility="visible" />
 
         <View
             android:id="@+id/view_middle"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:layout_height="15dp"
             android:background="#98bdcf" />
 
         <View
@@ -35,7 +35,7 @@
             android:layout_height="200dp"
             android:background="#cee9aa" />
 
-        <View
+        <!--<View
             android:id="@+id/view_bottom2"
             android:layout_width="match_parent"
             android:layout_height="200dp"
@@ -51,9 +51,9 @@
             android:id="@+id/view_bottom4"
             android:layout_width="match_parent"
             android:layout_height="350dp"
-            android:background="#7ec6c2" />
+            android:background="#7ec6c2" />-->
 
 
-    </com.leonxtp.fingerview.custom.MyVerticalPagerLayout>
+    </com.leonxtp.library.MyVerticalPagerLayout>
 
 </LinearLayout>

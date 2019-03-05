@@ -1,4 +1,4 @@
-package com.leonxtp.fingerview.custom.util;
+package com.leonxtp.library;
 
 import android.view.ViewGroup;
 
@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by LeonXtp on 2019/3/5 下午3:11
  */
-public class ComputeUtil {
+public class ScrollComputeUtil {
 
     /**
      * 计算手指松开后自动滚动的距离

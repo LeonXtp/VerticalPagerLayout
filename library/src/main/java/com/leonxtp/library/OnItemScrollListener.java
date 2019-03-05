@@ -1,4 +1,4 @@
-package com.leonxtp.fingerview.custom;
+package com.leonxtp.library;
 
 import android.view.View;
 

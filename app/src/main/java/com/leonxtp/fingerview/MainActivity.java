@@ -1,17 +1,16 @@
 package com.leonxtp.fingerview;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
+import android.util.Log;
 import android.view.Gravity;
 
 import com.github.rubensousa.gravitysnaphelper.GravityPagerSnapHelper;
 import com.leonxtp.fingerview.recycler.PagerViewAdapter;
 import com.leonxtp.fingerview.util.DisplayUtil;
-import com.leonxtp.fingerview.util.Logger;
 
 import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
 
@@ -84,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 offsetY += dy;
-                Logger.d("RecyclerView", "onScrolled: dy = " + dy + ", offsetY = " + offsetY);
+                Log.d("RecyclerView", "onScrolled: dy = " + dy + ", offsetY = " + offsetY);
 
                 RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(0);
                 if (holder != null) {

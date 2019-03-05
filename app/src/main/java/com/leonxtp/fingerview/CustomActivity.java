@@ -9,9 +9,9 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.leonxtp.fingerview.custom.MyVerticalPagerLayout;
-import com.leonxtp.fingerview.custom.OnItemScrollListener;
-import com.leonxtp.fingerview.util.Logger;
+import com.leonxtp.library.Logger;
+import com.leonxtp.library.MyVerticalPagerLayout;
+import com.leonxtp.library.OnItemScrollListener;
 
 public class CustomActivity extends AppCompatActivity implements View.OnClickListener {
 
