@@ -27,6 +27,8 @@ import java.util.List;
  * 多点触碰引起的ACTION_MOVE的eventY因手指变化出现跳动
  * 解决：
  * 在多点触碰事件触发的时候，下一次ACTION_MOVE事件忽略
+ * <p>
+ * 2. 全部子View不够父View高度，空白区域为何回调onItemSelected(.., 0)?
  */
 public class MyVerticalPagerLayout extends LinearLayout {
 
@@ -44,22 +46,34 @@ public class MyVerticalPagerLayout extends LinearLayout {
         init(context);
     }
 
-    // 回弹时，是否可跨越子View
+    /**
+     * 回弹时，是否可跨越子View
+     */
     private boolean isOverMovable = false;
 
-    // 自然状态下，View在自动滚动过程中，再次点按屏幕，滚动过程将不会停下，
-    // 需要在自动滚动过程中，继续处理ACTION_DOWN事件，拦截余下事件
+    /**
+     * 自然状态下，View在自动滚动过程中，再次点按屏幕，滚动过程将不会停下，
+     * 需要在自动滚动过程中，继续处理ACTION_DOWN事件，拦截余下事件
+     */
     private boolean mIsBeingDragged = false;
 
-    // 当ACTION_POINTER_DOWN 或者 ACTION_POINTER_UP事件触发时，将忽略下一次Move事件
+    /**
+     * 当ACTION_POINTER_DOWN 或者 ACTION_POINTER_UP事件触发时，将忽略下一次Move事件
+     */
     private boolean isPointerActionTriggered = false;
 
     private List<Integer> mChildHeightsList = new ArrayList<>();
-    // 子view可滚动的高度，如：父view高度100，子View高度加起来200，那么可滚动的区域就是200-100=100
+    /**
+     * 子view可滚动的高度，如：父view高度100，子View高度加起来200，那么可滚动的区域就是200-100=100
+     */
     private int mScrollableHeight = 0;
-    // 上次停留状态的y方向偏移
+    /**
+     * 上次停留状态的y方向偏移
+     */
     private int lastStayScrollY = 0;
-    // View滑动超出本身的滑动范围时，弹性效果的阻尼系数
+    /**
+     * View滑动超出本身的滑动范围时，弹性效果的阻尼系数
+     */
     private static final float OVER_SCROLL_DAMPING_COEFFICIENT = 0.2f;
 
     private OnItemScrollListener mOnItemScrollListener = null;
@@ -115,6 +129,7 @@ public class MyVerticalPagerLayout extends LinearLayout {
             Logger.d(TAG, "child " + i + ", height: " + childHeight);
         }
         mScrollableHeight = mContentHeight - getHeight();
+        Logger.d(TAG, "mScrollableHeight = " + mScrollableHeight);
     }
 
     private float previousTouchX, previousTouchY;
@@ -243,9 +258,14 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
         int scrollY = getScrollY();
         Logger.d(TAG, "onMoveVertical, scrollY = " + scrollY + ", moveY = " + moveY);
-        if (getScrollY() <= 0 && moveY < 0) {// 下拉超出
+        if (getScrollY() <= 0 && moveY < 0) {
+            // 下拉超出
             onMoveOverScroll(moveY);
-        } else if (mScrollableHeight >= 0 && getScrollY() >= mScrollableHeight && moveY > 0) {// 上拉超出
+        } else if (mScrollableHeight >= 0 && getScrollY() >= mScrollableHeight && moveY > 0) {
+            // 上拉超出
+            onMoveOverScroll(moveY);
+        } else if (mScrollableHeight < 0) {
+            // 子View高度都不够填充满父View，不给他弹性回弹效果了
             onMoveOverScroll(moveY);
         } else {
             onMoveInside(moveY);
@@ -275,15 +295,24 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
     private int computeAutoScrollDy() {
 
-        if (getScrollY() < 0) {// 下拉超出
+        if (getScrollY() < 0) {
+            // 下拉超出
             return -getScrollY();
-        } else if (mScrollableHeight > 0 && getScrollY() > mScrollableHeight) {// 上拉超出
+        } else if (mScrollableHeight > 0 && getScrollY() > mScrollableHeight) {
+            // 上拉超出，且内容高度超过父容器高度
             return -(getScrollY() - mScrollableHeight);
+        } else if (mScrollableHeight < 0 && getScrollY() > 0) {
+            // 上拉超出，且内容高度小于父容器高度
+            return -getScrollY();
         } else {
             return computeAutoScrollDyInside();
         }
     }
 
+    /**
+     * 计算手指松开后的自动滚动距离
+     * 这里在看第一个可见View是否超过了一半的同时，也要看最后一个View是否已经到底了
+     */
     private int computeAutoScrollDyInside() {
         int scrollY = getScrollY();
         int topY = 0;
@@ -296,9 +325,14 @@ public class MyVerticalPagerLayout extends LinearLayout {
             topY = bottomY;
         }
 
-        if (scrollY - topY < (bottomY - topY) / 2) {// 不到一半，需要回弹
+        if (scrollY - topY < (bottomY - topY) / 2) {
+            // 不到一半，需要回弹
             return topY - scrollY;
-        } else { // 等于或超过一半， 需要进击
+        } else if (bottomY > mScrollableHeight) {
+            // 等于或超过一半， 并且最后一个子View已经到底，否则将进击过多，导致底部空白
+            return mScrollableHeight - scrollY;
+        } else {
+            // 等于或超过一半， 并且最后一个子View没有到底
             return bottomY - scrollY;
         }
     }

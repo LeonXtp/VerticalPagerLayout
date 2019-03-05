@@ -7,16 +7,12 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.leonxtp.fingerview.custom.MyVerticalPagerLayout;
 import com.leonxtp.fingerview.custom.OnItemScrollListener;
 import com.leonxtp.fingerview.util.Logger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CustomActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -30,20 +26,21 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void initView() {
-//        MyScrollView myScrollView = findViewById(R.id.my_scroll_view);
-//        myScrollView.setScrollingEnabled(false);
-
         MyVerticalPagerLayout verticalPagerLayout = findViewById(R.id.vertical_pager_layout);
         verticalPagerLayout.addOnScrollListener(new OnItemScrollListener() {
             @Override
             public void onItemScrolled(View firstVisibleItem, int firstVisibleItemIndex, float firstVisibleItemOffset) {
                 Logger.w(TAG, "onItemScrolled, " + firstVisibleItem.hashCode() + ", " + firstVisibleItemIndex + ", " +
                         firstVisibleItemOffset);
+                if (firstVisibleItemIndex == 0) {
+                    firstVisibleItem.setAlpha(firstVisibleItemOffset);
+                }
             }
 
             @Override
             public void onItemSelected(View selectedItem, int selectedIndex) {
                 Logger.w(TAG, "onItemSelected, " + selectedItem.hashCode() + ", " + selectedIndex);
+                Toast.makeText(CustomActivity.this, "onItemSelected, " + selectedIndex, Toast.LENGTH_SHORT).show();
             }
         });
 
