@@ -6,8 +6,12 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.leonxtp.fingerview.custom.MyVerticalPagerLayout;
+import com.leonxtp.fingerview.custom.OnItemScrollListener;
+import com.leonxtp.fingerview.util.Logger;
 
 public class CustomActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private static final String TAG = "CustomActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +25,18 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
 //        myScrollView.setScrollingEnabled(false);
 
         MyVerticalPagerLayout verticalPagerLayout = findViewById(R.id.vertical_pager_layout);
+        verticalPagerLayout.addOnScrollListener(new OnItemScrollListener() {
+            @Override
+            public void onItemScrolled(View firstVisibleItem, int firstVisibleItemIndex, float firstVisibleItemOffset) {
+                Logger.w(TAG, "onItemScrolled, " + firstVisibleItem.hashCode() + ", " + firstVisibleItemIndex + ", " +
+                        firstVisibleItemOffset);
+            }
+
+            @Override
+            public void onItemSelected(View selectedItem, int selectedIndex) {
+                Logger.w(TAG, "onItemSelected, " + selectedItem.hashCode() + ", " + selectedIndex);
+            }
+        });
 
         View viewTop = findViewById(R.id.view_top);
         View viewMiddle = findViewById(R.id.view_middle);

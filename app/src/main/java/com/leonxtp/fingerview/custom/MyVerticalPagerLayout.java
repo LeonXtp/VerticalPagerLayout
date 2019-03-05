@@ -54,8 +54,6 @@ public class MyVerticalPagerLayout extends LinearLayout {
     private boolean isPointerActionTriggered = false;
 
     private List<Integer> mChildHeightsList = new ArrayList<>();
-    // 内容View的高度
-    private int mContentHeight = 0;
     // 子view可滚动的高度，如：父view高度100，子View高度加起来200，那么可滚动的区域就是200-100=100
     private int mScrollableHeight = 0;
     // 上次停留状态的y方向偏移
@@ -63,8 +61,18 @@ public class MyVerticalPagerLayout extends LinearLayout {
     // View滑动超出本身的滑动范围时，弹性效果的阻尼系数
     private static final float OVER_SCROLL_DAMPING_COEFFICIENT = 0.2f;
 
+    private OnItemScrollListener mOnItemScrollListener = null;
+
     private void init(Context context) {
         mScroller = new Scroller(context, new AccelerateDecelerateInterpolator());
+    }
+
+    public void addOnScrollListener(OnItemScrollListener listener) {
+        this.mOnItemScrollListener = listener;
+    }
+
+    public void removeScrollListener() {
+        this.mOnItemScrollListener = null;
     }
 
     @Override
@@ -78,17 +86,20 @@ public class MyVerticalPagerLayout extends LinearLayout {
         super.onLayout(changed, l, t, r, b);
 
         Logger.d(TAG, "onLayout, changed = " + changed);
-        if (changed) {
-            mChildHeightsList.clear();
-            mContentHeight = 0;
-            for (int i = 0; i < getChildCount(); i++) {
-                View child = getChildAt(i);
-                mChildHeightsList.add(child.getHeight());
-                mContentHeight += child.getHeight();
-                Logger.d(TAG, "child " + i + ", height: " + child.getHeight());
-            }
-            mScrollableHeight = mContentHeight - getHeight();
+        if (!changed) {
+            return;
         }
+
+        mChildHeightsList.clear();
+        int mContentHeight = 0;
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            mChildHeightsList.add(child.getHeight());
+            mContentHeight += child.getHeight();
+            Logger.d(TAG, "child " + i + ", height: " + child.getHeight());
+        }
+        mScrollableHeight = mContentHeight - getHeight();
+
     }
 
     private float previousTouchX, previousTouchY;
@@ -232,13 +243,14 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
     private void onMoveInside(float moveY) {
         scrollBy(0, (int) moveY);
+        // 调完scrollBy马上再重新getScrollY()，将不会立即见效，因此只能通过本次scrollY+moveY的方式回调滑动状态
+        handleMoveListener((int) moveY);
     }
 
     private void onActionUp() {
         int dy = computeAutoScrollDy();
         if (dy == 0) {
-            mIsBeingDragged = false;
-            Logger.d(TAG, "onActionUp...mIsBeingDragged = false");
+            onAutoScrollFinished();
         } else {
             Logger.d(TAG, "startScroll...dy = " + dy);
             mScroller.startScroll(0, getScrollY(), 0, dy, 300);
@@ -295,12 +307,76 @@ public class MyVerticalPagerLayout extends LinearLayout {
         if (!mScroller.isFinished() || oldY != currY || currY != finalY) {
             scrollTo(0, currY);
             postInvalidateOnAnimation();
+            handleAutoScrollListener(currY);
         }
 
         if (mScroller.isFinished()) {
-            mIsBeingDragged = false;
-            Logger.d(TAG, "mScroller.isFinished(), mIsBeingDragged = false. ");
+            onAutoScrollFinished();
         }
+    }
+
+    private void onAutoScrollFinished() {
+        mIsBeingDragged = false;
+        Logger.d(TAG, "mScroller.isFinished(), mIsBeingDragged = false. ");
+        if (mOnItemScrollListener != null) {
+            float[] firstVisibleItemInfo = findFirstVisibleItem(getScrollY());
+            mOnItemScrollListener.onItemSelected(getChildAt((int) firstVisibleItemInfo[0]),
+                    (int) firstVisibleItemInfo[0]);
+        }
+    }
+
+    /**
+     * 处理手动滑动过程中的滑动监听
+     *
+     * @param moveY 本次手指滑动的y方向距离
+     */
+    private void handleMoveListener(int moveY) {
+        int targetScrollY = getScrollY() + moveY;
+        handleAutoScrollListener(targetScrollY);
+    }
+
+    private void handleAutoScrollListener(int currY) {
+        if (currY < 0) {
+            // 拉出顶部时的回弹，不处理
+            return;
+        }
+        if (mScrollableHeight > 0 && currY > mScrollableHeight) {
+            // 拉出底部的回弹，不处理
+            return;
+        }
+
+        if (mOnItemScrollListener != null) {
+            float[] firstVisibleItemInfo = findFirstVisibleItem(currY);
+            mOnItemScrollListener.onItemScrolled(getChildAt((int) firstVisibleItemInfo[0]),
+                    (int) firstVisibleItemInfo[0], firstVisibleItemInfo[1]);
+        }
+    }
+
+    /**
+     * 根据目标scrollY找到所应该显示的第一个子View的index和显示的百分比
+     *
+     * @param targetScrollY 目标scrollY
+     * @return float数组，第0个是第一个显示的子View的下标
+     * 第1个是第一个子View显示高度占其自身高度的百分比，float类型，[0, 1]
+     */
+    private float[] findFirstVisibleItem(int targetScrollY) {
+        float itemIdex = 0;
+        int itemHeight = 0;
+        int bottomY = 0;
+        for (int i = 0; i < mChildHeightsList.size(); i++) {
+            bottomY += mChildHeightsList.get(i);
+            if (targetScrollY < bottomY) {
+                itemIdex = i;
+                itemHeight = mChildHeightsList.get(i);
+                break;
+            }
+        }
+
+        int visibleHeight = bottomY - targetScrollY;
+        float visibleOffset = visibleHeight * 1.0f / itemHeight;
+
+        return new float[]{itemIdex, visibleOffset};
+
     }
 
 }
