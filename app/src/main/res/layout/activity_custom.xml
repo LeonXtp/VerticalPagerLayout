@@ -21,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:background="#ef1804"
-            android:visibility="gone" />
+            android:visibility="visible" />
 
         <View
             android:id="@+id/view_middle"

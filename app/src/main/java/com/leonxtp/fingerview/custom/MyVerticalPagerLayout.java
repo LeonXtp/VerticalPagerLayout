@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.Scroller;
@@ -65,6 +66,14 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
     private void init(Context context) {
         mScroller = new Scroller(context, new AccelerateDecelerateInterpolator());
+
+        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                Logger.e(TAG, "onGlobalLayout...");
+                initChildrenHeights();
+            }
+        });
     }
 
     public void addOnScrollListener(OnItemScrollListener listener) {
@@ -89,17 +98,23 @@ public class MyVerticalPagerLayout extends LinearLayout {
         if (!changed) {
             return;
         }
+        initChildrenHeights();
+    }
 
+    private void initChildrenHeights() {
         mChildHeightsList.clear();
         int mContentHeight = 0;
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            mChildHeightsList.add(child.getHeight());
-            mContentHeight += child.getHeight();
-            Logger.d(TAG, "child " + i + ", height: " + child.getHeight());
+            int childHeight = 0;
+            if (child.getVisibility() == View.VISIBLE) {
+                childHeight = child.getHeight();
+            }
+            mChildHeightsList.add(childHeight);
+            mContentHeight += childHeight;
+            Logger.d(TAG, "child " + i + ", height: " + childHeight);
         }
         mScrollableHeight = mContentHeight - getHeight();
-
     }
 
     private float previousTouchX, previousTouchY;
@@ -374,7 +389,6 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
         int visibleHeight = bottomY - targetScrollY;
         float visibleOffset = visibleHeight * 1.0f / itemHeight;
-
         return new float[]{itemIdex, visibleOffset};
 
     }
