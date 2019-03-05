@@ -48,6 +48,13 @@ public class MyVerticalPagerLayout extends LinearLayout {
     }
 
     /**
+     * 是否可以手指滑动。控制思路：
+     * 1。当外部调用setMoveEnabled()方法禁用本View垂直方向当触摸事件时，不拦截所有触摸事件
+     * 2。当没有子View处理触摸事件，该事件又回传到本View时，不做任何处理
+     */
+    private boolean isMoveEnabled = true;
+
+    /**
      * 回弹时，是否可跨越子View
      */
     private boolean isOverMovable = false;
@@ -105,6 +112,10 @@ public class MyVerticalPagerLayout extends LinearLayout {
         this.mOnItemScrollListener = null;
     }
 
+    public void setMoveEnabled(boolean movable) {
+        this.isMoveEnabled = movable;
+    }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
@@ -144,7 +155,7 @@ public class MyVerticalPagerLayout extends LinearLayout {
 
                 Logger.w(TAG, "onInterceptTouchEvent ACTION_DOWN");
 
-                intercept = mIsBeingDragged;
+                intercept = mIsBeingDragged && isMoveEnabled;
                 previousTouchX = ev.getX();
                 previousTouchY = ev.getY();
 
@@ -162,10 +173,10 @@ public class MyVerticalPagerLayout extends LinearLayout {
                 previousTouchY = ev.getY();
 
                 if (Math.abs(moveY) > Math.abs(moveX)) {
-                    Logger.w(TAG, "onTouchEvent move vertically");
+                    Logger.w(TAG, "onInterceptTouchEvent move vertically");
                     intercept = true;
                 } else {
-                    Logger.w(TAG, "onTouchEvent move horizontally");
+                    Logger.w(TAG, "onInterceptTouchEvent move horizontally");
                 }
 
 
@@ -187,6 +198,8 @@ public class MyVerticalPagerLayout extends LinearLayout {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
 
+        boolean handled = true;
+
         int action = ev.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
@@ -206,6 +219,13 @@ public class MyVerticalPagerLayout extends LinearLayout {
                 break;
             case MotionEvent.ACTION_MOVE:
                 Logger.w(TAG, "onTouchEvent ACTION_MOVE");
+
+                if (!isMoveEnabled) {
+                    // 当外部调用setMoveEnabled()方法禁用本View当触摸事件时
+                    handled = false;
+                    Logger.w(TAG, "onTouchEvent isMoveEnabled false, break;");
+                    break;
+                }
 
                 float moveX = previousTouchX - ev.getX();
                 float moveY = previousTouchY - ev.getY();
@@ -240,7 +260,7 @@ public class MyVerticalPagerLayout extends LinearLayout {
                 break;
         }
 
-        return true;
+        return handled;
     }
 
     private void onActionDown() {
@@ -260,17 +280,17 @@ public class MyVerticalPagerLayout extends LinearLayout {
         Logger.d(TAG, "onMoveVertical, scrollY = " + scrollY + ", moveY = " + moveY);
         if (ComputeUtil.isMoveOverScroll(scrollY, moveY, mScrollableHeight)) {
             // 需要加阻尼
-            onMoveOverScroll(moveY);
+            handleMoveOverScroll(moveY);
         } else {
-            onMoveInside(moveY);
+            handleMoveInside(moveY);
         }
     }
 
-    private void onMoveOverScroll(float moveY) {
+    private void handleMoveOverScroll(float moveY) {
         scrollBy(0, (int) (moveY * OVER_SCROLL_DAMPING_COEFFICIENT));
     }
 
-    private void onMoveInside(float moveY) {
+    private void handleMoveInside(float moveY) {
         scrollBy(0, (int) moveY);
         // 调完scrollBy马上再重新getScrollY()，将不会立即见效，因此只能通过本次scrollY+moveY的方式回调滑动状态
         handleMoveListener((int) moveY);

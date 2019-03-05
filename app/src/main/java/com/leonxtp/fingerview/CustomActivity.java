@@ -1,13 +1,12 @@
 package com.leonxtp.fingerview;
 
-import android.graphics.Color;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.leonxtp.fingerview.custom.MyVerticalPagerLayout;
@@ -18,6 +17,8 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
 
     private static final String TAG = "CustomActivity";
 
+    private MyVerticalPagerLayout verticalPagerLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,7 +27,7 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void initView() {
-        MyVerticalPagerLayout verticalPagerLayout = findViewById(R.id.vertical_pager_layout);
+        verticalPagerLayout = findViewById(R.id.vertical_pager_layout);
         verticalPagerLayout.addOnScrollListener(new OnItemScrollListener() {
             @Override
             public void onItemScrolled(View firstVisibleItem, int firstVisibleItemIndex, float firstVisibleItemOffset) {
@@ -56,6 +57,8 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
+    private HorizontalScrollView scrollView;
+
     @Override
     public void onClick(View v) {
         Toast.makeText(this, String.valueOf(v.getId()), Toast.LENGTH_SHORT).show();
@@ -67,22 +70,42 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
             }
         }
         if (v.getId() == R.id.view_top2) {
-            TextView textView = new TextView(this);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    400);
-            textView.setLayoutParams(layoutParams);
-            textView.setGravity(Gravity.CENTER);
-            textView.setText("Added TextView");
-            textView.setBackgroundColor(Color.GRAY);
-            ((ViewGroup) findViewById(R.id.vertical_pager_layout)).addView(textView, 2);
+
+            verticalPagerLayout.setMoveEnabled(true);
+
+//            TextView textView = new TextView(this);
+//            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams
+// .MATCH_PARENT,
+//                    400);
+//            textView.setLayoutParams(layoutParams);
+//            textView.setGravity(Gravity.CENTER);
+//            textView.setText("Added TextView");
+//            textView.setBackgroundColor(Color.GRAY);
+//            ((ViewGroup) findViewById(R.id.vertical_pager_layout)).addView(textView, 2);
+
         }
         if (v.getId() == R.id.view_middle) {
 
-            View scrollView = getLayoutInflater().inflate(R.layout.layout_scroll_content, null);
+            if (scrollView != null) {
+                verticalPagerLayout.setMoveEnabled(true);
+                return;
+            }
+            scrollView = (HorizontalScrollView) getLayoutInflater().inflate(R.layout.layout_scroll_content, null);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    450);
+                    550);
             scrollView.setLayoutParams(layoutParams);
             ((ViewGroup) findViewById(R.id.vertical_pager_layout)).addView(scrollView, 3);
+
+            if (Build.VERSION.SDK_INT >= 23) {
+                scrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                    @Override
+                    public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+
+                        verticalPagerLayout.setMoveEnabled(false);
+
+                    }
+                });
+            }
 
         }
     }
