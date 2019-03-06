@@ -2,6 +2,7 @@ package com.leonxtp.library;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import java.util.List;
 
@@ -18,15 +19,18 @@ public class ScrollComputeUtil {
      * @param parent            父容器
      * @return 所有子View的高度总和
      */
-    public static int initContentHeights(List<Integer> mChildHeightsList, ViewGroup parent) {
+    public static int initContentHeights(List<Integer> mChildHeightsList, LinearLayout parent) {
         mChildHeightsList.clear();
         int mContentHeight = 0;
         for (int i = 0; i < parent.getChildCount(); i++) {
             View child = parent.getChildAt(i);
             int childHeight = 0;
             if (child.getVisibility() == View.VISIBLE) {
-                childHeight = child.getHeight();
+                int marginTop = ((LinearLayout.LayoutParams) child.getLayoutParams()).topMargin;
+                int marginBottom = ((LinearLayout.LayoutParams) child.getLayoutParams()).bottomMargin;
+                childHeight = child.getHeight() + marginTop + marginBottom;
             }
+            Logger.w("VerticalPagerLayout", "initContentHeights child " + i + " , Height:" + childHeight);
             mChildHeightsList.add(childHeight);
             mContentHeight += childHeight;
         }
@@ -49,8 +53,8 @@ public class ScrollComputeUtil {
         } else if (scrollableHeight > 0 && scrollY > scrollableHeight) {
             // 上拉超出，且内容高度超过父容器高度
             return -(scrollY - scrollableHeight);
-        } else if (scrollableHeight < 0 && scrollY > 0) {
-            // 上拉超出，且内容高度小于父容器高度
+        } else if (scrollableHeight <= 0 && scrollY > 0) {
+            // 上拉超出，且内容高度小于等于父容器高度
             return -scrollY;
         } else {
             return computeAutoScrollDyInside(scrollY, childrenHeightList, scrollableHeight);
@@ -113,8 +117,8 @@ public class ScrollComputeUtil {
     /**
      * 判断当手指在拖动View滚动的时候，是否需要加阻尼
      *
-     * @param scrollY           父容器的scrollY, 通过{@link ViewGroup#getScrollY()}取得
-     * @param moveY             当次{@link android.view.MotionEvent}移动的垂直方向距离
+     * @param scrollY          父容器的scrollY, 通过{@link ViewGroup#getScrollY()}取得
+     * @param moveY            当次{@link android.view.MotionEvent}移动的垂直方向距离
      * @param scrollableHeight 父容器高度-所有子View的高度得到的一个可滚动的范围
      */
     public static boolean isMoveOverScroll(int scrollY, float moveY, int scrollableHeight) {

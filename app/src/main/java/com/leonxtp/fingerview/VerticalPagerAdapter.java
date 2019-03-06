@@ -1,9 +1,10 @@
 package com.leonxtp.fingerview;
 
+import android.content.Context;
 import android.os.Build;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.view.PagerAdapter;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
@@ -14,28 +15,43 @@ import com.leonxtp.library.Logger;
 import com.leonxtp.library.OnItemScrollListener;
 import com.leonxtp.library.VerticalPagerLayout;
 
-public class CustomActivity extends AppCompatActivity implements View.OnClickListener {
+/**
+ * Created by LeonXtp on 2019/3/6 下午9:26
+ */
+public class VerticalPagerAdapter extends PagerAdapter implements View.OnClickListener {
 
-    private static final String TAG = "CustomActivity";
-
-    private ViewPager mViewPager;
+    private static final String TAG = "VerticalPagerAdapter";
 
     private VerticalPagerLayout verticalPagerLayout;
+    private Context context;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_custom);
-
-        mViewPager = findViewById(R.id.view_pager);
-        VerticalPagerAdapter adapter = new VerticalPagerAdapter(this);
-        mViewPager.setAdapter(adapter);
-//        initView();
+    public VerticalPagerAdapter(Context context) {
+        this.context = context;
     }
 
-    private void initView() {
+    @Override
+    public int getCount() {
+        return 1;
+    }
 
-        verticalPagerLayout = findViewById(R.id.vertical_pager_layout);
+    @NonNull
+    @Override
+    public Object instantiateItem(@NonNull ViewGroup container, int position) {
+        ViewGroup rootView = (ViewGroup) LayoutInflater.from(container.getContext()).inflate(
+                R.layout.layout_vertical_view_pager, null);
+        initView(rootView);
+        container.addView(rootView);
+        return rootView;
+    }
+
+    @Override
+    public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
+        return view == object;
+    }
+
+    private void initView(ViewGroup rootView) {
+
+        verticalPagerLayout = rootView.findViewById(R.id.vertical_pager_layout);
         verticalPagerLayout.addOnScrollListener(new OnItemScrollListener() {
             @Override
             public void onItemScrolled(View firstVisibleItem, int firstVisibleItemIndex, float firstVisibleItemOffset) {
@@ -49,14 +65,14 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
             @Override
             public void onItemSelected(View selectedItem, int selectedIndex) {
                 Logger.w(TAG, "onItemSelected, " + selectedItem.hashCode() + ", " + selectedIndex);
-                Toast.makeText(CustomActivity.this, "onItemSelected, " + selectedIndex, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "onItemSelected, " + selectedIndex, Toast.LENGTH_SHORT).show();
             }
         });
 
-        View viewTop = findViewById(R.id.view_top);
-        View viewTop2 = findViewById(R.id.view_top2);
-        View viewMiddle = findViewById(R.id.view_middle);
-        View viewBottom = findViewById(R.id.view_bottom);
+        View viewTop = rootView.findViewById(R.id.view_top);
+        View viewTop2 = rootView.findViewById(R.id.view_top2);
+        View viewMiddle = rootView.findViewById(R.id.view_middle);
+        View viewBottom = rootView.findViewById(R.id.view_bottom);
 
         viewTop.setOnClickListener(this);
         viewTop2.setOnClickListener(this);
@@ -69,16 +85,16 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
-        Toast.makeText(this, String.valueOf(v.getId()), Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, String.valueOf(v.getId()), Toast.LENGTH_SHORT).show();
         if (v.getId() == R.id.view_top) {
 //            if (findViewById(R.id.view_top2).getVisibility() == View.VISIBLE) {
 //                findViewById(R.id.view_top2).setVisibility(View.GONE);
 //            } else {
 //                findViewById(R.id.view_top2).setVisibility(View.VISIBLE);
 //            }
-            View setSizeView = findViewById(R.id.viewSetSize);
+            View setSizeView = verticalPagerLayout.findViewById(R.id.viewSetSize);
             LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) setSizeView.getLayoutParams();
-            layoutParams.height = 500;
+            layoutParams.height = 900;
             setSizeView.setLayoutParams(layoutParams);
         }
         if (v.getId() == R.id.view_top2) {
@@ -102,11 +118,12 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
                 verticalPagerLayout.setMoveEnabled(true);
                 return;
             }
-            scrollView = (HorizontalScrollView) getLayoutInflater().inflate(R.layout.layout_scroll_content, null);
+            scrollView = (HorizontalScrollView) LayoutInflater.from(context).inflate(R.layout.layout_scroll_content,
+                    null);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     550);
             scrollView.setLayoutParams(layoutParams);
-            ((ViewGroup) findViewById(R.id.vertical_pager_layout)).addView(scrollView, 3);
+            ((ViewGroup) verticalPagerLayout.findViewById(R.id.vertical_pager_layout)).addView(scrollView, 3);
 
             if (Build.VERSION.SDK_INT >= 23) {
                 scrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
@@ -121,4 +138,5 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
 
         }
     }
+
 }

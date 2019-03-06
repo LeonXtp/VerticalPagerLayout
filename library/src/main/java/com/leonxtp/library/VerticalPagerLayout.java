@@ -162,7 +162,10 @@ public class VerticalPagerLayout extends LinearLayout {
 
     private void initChildrenHeights() {
         int contentHeight = ScrollComputeUtil.initContentHeights(mChildHeightsList, this);
+        int parentHeight = getHeight();
+        Logger.w(TAG, "contentHeight = " + contentHeight + ", parentHeight = " + parentHeight);
         mScrollableHeight = contentHeight - getHeight() > 0 ? contentHeight - getHeight() : 0;
+        Logger.w(TAG, "mScrollableHeight = " + mScrollableHeight);
     }
 
     private float previousTouchX, previousTouchY;

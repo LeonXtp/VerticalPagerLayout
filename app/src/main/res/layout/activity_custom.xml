@@ -1,59 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/my_scroll_view"
+<android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/view_pager"
     android:layout_width="match_parent"
-    android:layout_height="600dp">
+    android:layout_height="match_parent"
+    android:background="#000000">
 
-    <com.leonxtp.library.VerticalPagerLayout
-        android:id="@+id/vertical_pager_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <View
-            android:id="@+id/view_top"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="#e2b2bd" />
-
-        <View
-            android:id="@+id/view_top2"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="#ef1804"
-            android:visibility="visible" />
-
-        <View
-            android:id="@+id/view_middle"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:background="#98bdcf" />
-
-        <View
-            android:id="@+id/view_bottom"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="#cee9aa" />
-
-        <View
-            android:id="@+id/view_bottom2"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="#e9d7aa" />
-
-        <View
-            android:id="@+id/view_bottom3"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="#8c7ec6" />
-
-        <View
-            android:id="@+id/view_bottom4"
-            android:layout_width="match_parent"
-            android:layout_height="350dp"
-            android:background="#7ec6c2" />
-
-
-    </com.leonxtp.library.VerticalPagerLayout>
-
-</LinearLayout>
+</android.support.v4.view.ViewPager>
