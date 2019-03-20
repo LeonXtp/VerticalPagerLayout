@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollParent"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout
+    <com.leonxtp.library.LockableScrollView
+        android:id="@+id/lockableScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -14,40 +16,45 @@
             android:orientation="vertical">
 
             <View
-                android:id="@+id/view_top"
+                android:id="@+id/id0"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="150dp"
+                android:background="#65bdda"/>
+
+            <View
+                android:id="@+id/id1"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
                 android:background="#cf4e6c" />
 
             <View
-                android:id="@+id/view_top2"
+                android:id="@+id/id2"
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:background="#532520"
-                android:visibility="visible" />
+                android:layout_height="120dp"
+                android:background="#532520" />
 
             <View
-                android:id="@+id/view_middle"
+                android:id="@+id/id3"
                 android:layout_width="match_parent"
-                android:layout_height="10dp"
+                android:layout_height="120dp"
                 android:background="#98bdcf" />
 
             <View
-                android:id="@+id/view_bottom"
+                android:id="@+id/id4"
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="120dp"
                 android:background="#cee9aa" />
 
             <View
-                android:id="@+id/view_bottom2"
+                android:id="@+id/id5"
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="120dp"
                 android:background="#e9d7aa" />
 
             <View
-                android:id="@+id/view_bottom3"
+                android:id="@+id/id6"
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="120dp"
                 android:background="#8c7ec6" />
 
             <LinearLayout
@@ -56,20 +63,20 @@
                 android:orientation="vertical">
 
                 <View
-                    android:id="@+id/viewSetSize"
+                    android:id="@+id/id7"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="300dp"
                     android:background="#ff0000" />
-
             </LinearLayout>
 
             <View
-                android:id="@+id/view_bottom4"
+                android:id="@+id/id8"
                 android:layout_width="match_parent"
                 android:layout_height="400dp"
                 android:background="#8c7ec6" />
 
         </com.leonxtp.library.VerticalPagerLayout>
-    </FrameLayout>
 
-</ScrollView>
+    </com.leonxtp.library.LockableScrollView>
+
+</FrameLayout>

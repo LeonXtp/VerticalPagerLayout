@@ -11,6 +11,8 @@ import java.util.List;
  */
 public class ScrollComputeUtil {
 
+    private static final String TAG = "VerticalPagerLayout";
+
     /**
      * 初始化所有子View的高度
      * 注意：暂时不考虑各个子View存在margin的情况
@@ -30,7 +32,7 @@ public class ScrollComputeUtil {
                 int marginBottom = ((LinearLayout.LayoutParams) child.getLayoutParams()).bottomMargin;
                 childHeight = child.getHeight() + marginTop + marginBottom;
             }
-            Logger.w("VerticalPagerLayout", "initContentHeights child " + i + " , Height:" + childHeight);
+            Logger.w(TAG, "initContentHeights child " + i + " , Height:" + childHeight);
             mChildHeightsList.add(childHeight);
             mContentHeight += childHeight;
         }
@@ -54,7 +56,7 @@ public class ScrollComputeUtil {
             // 上拉超出，且内容高度超过父容器高度
             return -(scrollY - scrollableHeight);
         } else if (scrollableHeight <= 0 && scrollY > 0) {
-            // 上拉超出，且内容高度小于等于父容器高度
+            // 上拉超出，且内容高度小于父容器高度
             return -scrollY;
         } else {
             return computeAutoScrollDyInside(scrollY, childrenHeightList, scrollableHeight);
@@ -95,7 +97,7 @@ public class ScrollComputeUtil {
      * @return float数组，第0个是第一个显示的子View的下标
      * 第1个是第一个子View显示高度占其自身高度的百分比，float类型，[0, 1]
      */
-    public static float[] findFirstVisibleItem(List<Integer> childrenHeightList, int targetScrollY) {
+    public static float[] findFirstShownItem(List<Integer> childrenHeightList, int targetScrollY) {
         float itemIdex = 0;
         int itemHeight = 0;
         int bottomY = 0;
@@ -133,5 +135,94 @@ public class ScrollComputeUtil {
         }
     }
 
+    /**
+     * 获取要滑动到指定的item所需要的距离偏移量，需要考虑最后一个子View已经到底到情况
+     */
+    public static int getDyForScrollToIndex(List<Integer> childrenHeightList, int targetItemIndex,
+                                            int scrollY, int scrollableHeight) {
+        if (targetItemIndex >= childrenHeightList.size()) {
+            return 0;
+        }
+        if (targetItemIndex == 0) {
+            return -scrollY;
+        }
+        int dy = 0;
+        for (int i = 0; i < targetItemIndex; i++) {
+            dy += childrenHeightList.get(i);
+        }
+        if (dy > scrollableHeight) {
+            dy = scrollableHeight;
+        }
+        return -(scrollY - dy);
+    }
+
+    /**
+     * 找到第一个{@link View#getVisibility()}为{@link View#VISIBLE}的子View下标及该view的高度（包括上下margin）
+     *
+     * @return 如果未找到，返回-1
+     */
+    public static int[] findFirstVisibleItemIndex(LinearLayout parent) {
+        int[] result = new int[]{-1, 0};
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            View child = parent.getChildAt(i);
+            if (child.getVisibility() == View.VISIBLE) {
+                result[0] = i;
+                int marginTop = ((LinearLayout.LayoutParams) child.getLayoutParams()).topMargin;
+                int marginBottom = ((LinearLayout.LayoutParams) child.getLayoutParams()).bottomMargin;
+                result[1] = child.getHeight() + marginTop + marginBottom;
+                return result;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 找到在因滑出后看不见的，第一个设为了{@link View#GONE}的子View的高度
+     */
+    public static int findGoneViewWhenNotShown(List<Integer> childrenHeightList, List<Integer> lastChildrenHeightList) {
+        if (childrenHeightList.size() != lastChildrenHeightList.size()) {
+            return -1;
+        }
+
+        for (int i = 0; i < childrenHeightList.size(); i++) {
+            if (childrenHeightList.get(i) != 0) {
+                // 从上往下，只要遇到不等于0，就是visible的，就不用找了，没有
+                break;
+            }
+            if (lastChildrenHeightList.get(i) == 0) {
+                // 当前这个子view为gone，而如果之前也是gone，说明不是这个，继续
+                continue;
+            }
+            // 当前遍历到的子View为gone，而之前不是gone，那么找到你了！
+            return i;
+
+        }
+        return -1;
+    }
+
+    /**
+     * 找到在因滑出后看不见的，第一个设为了{@link View#VISIBLE}的子View的高度
+     */
+    public static int findBecomeVisibleViewWhenNotShown(List<Integer> childrenHeightList,
+                                                        List<Integer> lastChildrenHeightList) {
+        if (childrenHeightList.size() != lastChildrenHeightList.size()) {
+            return -1;
+        }
+
+        for (int i = 0; i < lastChildrenHeightList.size(); i++) {
+            if (lastChildrenHeightList.get(i) != 0) {
+                // 从上往下，只要遇到不等于0，就是visible的，就不用找了，没有
+                break;
+            }
+            if (childrenHeightList.get(i) == 0) {
+                // 当前这个子view为gone，而如果之前也是gone，说明不是这个，继续
+                continue;
+            }
+            // 当前遍历到的子View为gone，而之前不是gone，那么找到你了！
+            return i;
+
+        }
+        return -1;
+    }
 
 }

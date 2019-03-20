@@ -1,9 +1,12 @@
 package com.leonxtp.fingerview;
 
+import android.content.res.Configuration;
 import android.os.Build;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
@@ -33,8 +36,13 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
 //        initView();
     }
 
-    private void initView() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Logger.d("ScreenSize", "onResume " + getResources().getDisplayMetrics().heightPixels);
+    }
 
+    private void initView() {
         verticalPagerLayout = findViewById(R.id.vertical_pager_layout);
         verticalPagerLayout.addOnScrollListener(new OnItemScrollListener() {
             @Override
@@ -53,10 +61,10 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
 
-        View viewTop = findViewById(R.id.view_top);
-        View viewTop2 = findViewById(R.id.view_top2);
-        View viewMiddle = findViewById(R.id.view_middle);
-        View viewBottom = findViewById(R.id.view_bottom);
+        View viewTop = findViewById(R.id.id1);
+        View viewTop2 = findViewById(R.id.id2);
+        View viewMiddle = findViewById(R.id.id3);
+        View viewBottom = findViewById(R.id.id4);
 
         viewTop.setOnClickListener(this);
         viewTop2.setOnClickListener(this);
@@ -66,59 +74,66 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private HorizontalScrollView scrollView;
+    private boolean isScrollViewAdded = false;
 
     @Override
     public void onClick(View v) {
         Toast.makeText(this, String.valueOf(v.getId()), Toast.LENGTH_SHORT).show();
-        if (v.getId() == R.id.view_top) {
-//            if (findViewById(R.id.view_top2).getVisibility() == View.VISIBLE) {
-//                findViewById(R.id.view_top2).setVisibility(View.GONE);
-//            } else {
-//                findViewById(R.id.view_top2).setVisibility(View.VISIBLE);
-//            }
-            View setSizeView = findViewById(R.id.viewSetSize);
+        if (v.getId() == R.id.id0) {
+            View setSizeView = findViewById(R.id.id1);
             LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) setSizeView.getLayoutParams();
-            layoutParams.height = 500;
+            if (layoutParams.height == 500) {
+                layoutParams.height = 100;
+            } else {
+                layoutParams.height = 500;
+            }
             setSizeView.setLayoutParams(layoutParams);
         }
-        if (v.getId() == R.id.view_top2) {
 
-            verticalPagerLayout.setMoveEnabled(true);
-
-//            TextView textView = new TextView(this);
-//            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams
-// .MATCH_PARENT,
-//                    400);
-//            textView.setLayoutParams(layoutParams);
-//            textView.setGravity(Gravity.CENTER);
-//            textView.setText("Added TextView");
-//            textView.setBackgroundColor(Color.GRAY);
-//            ((ViewGroup) findViewById(R.id.vertical_pager_layout)).addView(textView, 2);
-
+        if (v.getId() == R.id.id1) {
+            if (findViewById(R.id.id2).getVisibility() == View.VISIBLE) {
+                findViewById(R.id.id2).setVisibility(View.GONE);
+            } else {
+                findViewById(R.id.id2).setVisibility(View.VISIBLE);
+            }
         }
-        if (v.getId() == R.id.view_middle) {
 
-            if (scrollView != null) {
-                verticalPagerLayout.setMoveEnabled(true);
+        if (v.getId() == R.id.id2) {
+
+            if (scrollView == null) {
+                scrollView = (HorizontalScrollView) getLayoutInflater().inflate(R.layout.layout_scroll_content, null);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams
+                        .MATCH_PARENT, 550);
+                scrollView.setLayoutParams(layoutParams);
+                if (Build.VERSION.SDK_INT >= 23) {
+                    scrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                        @Override
+                        public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                            verticalPagerLayout.setMoveEnabled(false);
+                        }
+                    });
+                }
+                ((ViewGroup) findViewById(R.id.vertical_pager_layout)).addView(scrollView, 3);
+                isScrollViewAdded = true;
                 return;
             }
-            scrollView = (HorizontalScrollView) getLayoutInflater().inflate(R.layout.layout_scroll_content, null);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    550);
-            scrollView.setLayoutParams(layoutParams);
-            ((ViewGroup) findViewById(R.id.vertical_pager_layout)).addView(scrollView, 3);
 
-            if (Build.VERSION.SDK_INT >= 23) {
-                scrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-                    @Override
-                    public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-
-                        verticalPagerLayout.setMoveEnabled(false);
-
-                    }
-                });
+            if (isScrollViewAdded) {
+                verticalPagerLayout.removeView(scrollView);
+                isScrollViewAdded = false;
+            } else {
+                verticalPagerLayout.addView(scrollView, 3);
+                isScrollViewAdded = true;
             }
+
 
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
 }
