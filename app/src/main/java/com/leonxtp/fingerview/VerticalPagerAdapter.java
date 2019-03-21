@@ -128,7 +128,7 @@ public class VerticalPagerAdapter extends PagerAdapter implements View.OnClickLi
                     scrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
                         @Override
                         public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                            verticalPagerLayout.setMoveEnabled(false);
+                            verticalPagerLayout.setVerticalMoveEnabled(false);
                         }
                     });
                 }
@@ -140,7 +140,7 @@ public class VerticalPagerAdapter extends PagerAdapter implements View.OnClickLi
 
             if (isScrollViewAdded) {
                 verticalPagerLayout.removeView(scrollView);
-                verticalPagerLayout.setMoveEnabled(true);
+                verticalPagerLayout.setVerticalMoveEnabled(true);
                 Toast.makeText(context, "ScrollView removed", Toast.LENGTH_SHORT).show();
                 isScrollViewAdded = false;
             } else {

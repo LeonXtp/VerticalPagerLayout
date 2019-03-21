@@ -109,7 +109,7 @@ public class CustomActivity extends AppCompatActivity implements View.OnClickLis
                     scrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
                         @Override
                         public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                            verticalPagerLayout.setMoveEnabled(false);
+                            verticalPagerLayout.setVerticalMoveEnabled(false);
                         }
                     });
                 }
