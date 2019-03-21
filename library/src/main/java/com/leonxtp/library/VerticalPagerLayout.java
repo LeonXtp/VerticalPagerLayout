@@ -49,6 +49,10 @@ public class VerticalPagerLayout extends LinearLayout {
      */
     private boolean isVerticalMoveEnabled = true;
     /**
+     * 默认选中的item下标
+     */
+    private int mDefaultSelectedItemIndex = 0;
+    /**
      * 当前是否正在滑动，包括手指拖动以及自动滚动两个阶段。
      * 自然状态下，View在自动滚动过程中，再次点按屏幕，滚动过程将不会停下，
      * 需要在自动滚动过程中，继续处理ACTION_DOWN事件，拦截余下事件
@@ -116,6 +120,10 @@ public class VerticalPagerLayout extends LinearLayout {
      * =================================================================================================================
      */
 
+    public void setDefaultSelectedItem(int index) {
+        this.mDefaultSelectedItemIndex = index;
+    }
+
     /**
      * 当前是否增在滑动，包括手指拖动和自动滚动
      */
@@ -177,9 +185,7 @@ public class VerticalPagerLayout extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
         if (getParent() instanceof ScrollView) {
-//            Logger.d(TAG, "getParent() instanceof ScrollView");
             // 这里默认其父容器ScrollView已全部可见
             mVisibleHeight = MeasureSpec.getSize(heightMeasureSpec);
         }
@@ -217,9 +223,15 @@ public class VerticalPagerLayout extends LinearLayout {
         mLastChildHeightsList.clear();
         mLastChildHeightsList.addAll(mCurrentChildHeightsList);
 
-        if (!isFirstLayoutFinished && mIndex2ScrollBeforeLayout >= 0) {
+        if (isFirstLayoutFinished) {
+            return;
+        }
+        if (mIndex2ScrollBeforeLayout >= 0) {
             // 在本View第一次layout之前调用了scrollToItem()方法，此时完成其"夙愿"
             scrollToItem(mIndex2ScrollBeforeLayout, false);
+        } else {
+            // 第一次layout，那么展示默认的item
+            scrollToItem(mDefaultSelectedItemIndex, false);
         }
     }
 
