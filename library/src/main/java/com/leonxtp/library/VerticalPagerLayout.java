@@ -37,10 +37,16 @@ public class VerticalPagerLayout extends LinearLayout {
     private int mTouchSlop;
     /**
      * 本View尚未完成绘制时，外部可能就已经调用了其{@link #scrollToItem(int, boolean)}方法，
-     * 此时是无效的，因此需要在layout完成时，完成外部在此前的一次调用
+     * 此时是无效的，因此需要在layout完成时，继续完成外部在此前的一次调用
      */
     private boolean isFirstLayoutFinished = false;
     private int mIndex2ScrollBeforeLayout = -1;
+    /**
+     * 当前是否正在滑动，包括手指拖动以及自动滚动两个阶段。
+     * 自然状态下，View在自动滚动过程中，再次点按屏幕，滚动过程将不会停下，
+     * 需要在自动滚动过程中，继续处理ACTION_DOWN事件，拦截余下事件
+     */
+    private boolean isScrolling = false;
     /**
      * 是否可以手指滑动。控制思路：
      * 1。当外部调用setMoveEnabled()方法禁用本View垂直方向当触摸事件时，不拦截所有触摸事件
@@ -53,23 +59,23 @@ public class VerticalPagerLayout extends LinearLayout {
      */
     private int mDefaultSelectedItemIndex = 0;
     /**
-     * 当前是否正在滑动，包括手指拖动以及自动滚动两个阶段。
-     * 自然状态下，View在自动滚动过程中，再次点按屏幕，滚动过程将不会停下，
-     * 需要在自动滚动过程中，继续处理ACTION_DOWN事件，拦截余下事件
-     */
-    private boolean isScrolling = false;
-    /**
      * 当ACTION_POINTER_DOWN 或者 ACTION_POINTER_UP事件触发时，将忽略下一次Move事件，原因：
      * 当多指触碰时，抬起一只手指，则下一次{@link MotionEvent#ACTION_MOVE}时，
      * 位置getY()将直接跳到另一只手指的位置，出现滑动闪跳
      */
     private boolean isPointerActionTriggered = false;
     /**
-     * 回弹时，是否可跨越子View
+     * 回弹时，是否可跨越子View拖动
      */
-    private boolean isOverMovable = false;
+    private boolean isCrossItemDragEnabled = true;
     /**
-     * 所有子View各自的高度
+     * 当已滑出可见区域之外的子item的从{@link View#VISIBLE}变为{@link View#GONE}时，
+     * 或者当前第一个展示的item且上方的所有item都为{@link View#GONE}，其上方的item从{@link View#GONE}变为{@link View#VISIBLE}时
+     * 内容区域是否保持不变
+     */
+    private boolean isKeepContentOnItemVisibilityChanged = true;
+    /**
+     * 所有子View各自的高度，每次onLayout时都会重新计算
      */
     private List<Integer> mCurrentChildHeightsList = new ArrayList<>();
     /**
@@ -78,7 +84,7 @@ public class VerticalPagerLayout extends LinearLayout {
      */
     private List<Integer> mLastChildHeightsList = new ArrayList<>();
     /**
-     * 本View的可见高度，因其可能放在一个禁用了滚动效果的ScrollView内部
+     * 本View的肉眼可见高度，因其可能放在一个禁用了滚动效果的ScrollView内部
      */
     private int mVisibleHeight = 0;
     /**
@@ -88,8 +94,9 @@ public class VerticalPagerLayout extends LinearLayout {
     private int mScrollableHeight = 0;
     /**
      * 上次选中的itemIndex，目的：
-     * 1。防止当前显示的item没有变化时，一点微小的滑动也会回调
+     * 1. 防止当前显示的item没有变化时，一点微小的滑动也会回调
      * {@link OnItemScrollListener#onItemSelected(View, int)}
+     * 2. 当不允许跨子item拖动时，用于记录上次的停留位置，当手指松开时计算回滚距离
      */
     private int mLastSelectedItemIndex = 0;
     /**
@@ -120,8 +127,25 @@ public class VerticalPagerLayout extends LinearLayout {
      * =================================================================================================================
      */
 
+    /**
+     * 设置是否可以跨越子View拖动，
+     * 如当前显示第0个item，手指拖动至第3个（不管是否超过第3个的一半），松开时自动滑动至第1个，
+     * 如当前显示第1个item，手指拖动至第0个，且不超过第0个的一半，则松开手指时自动回弹至第1个
+     * 默认为true
+     */
+    public void setCrossItemDragEnabled(boolean isCrossItemMovable) {
+        this.isCrossItemDragEnabled = isCrossItemMovable;
+    }
+
+    /**
+     * 设置默认展示的item
+     */
     public void setDefaultSelectedItem(int index) {
         this.mDefaultSelectedItemIndex = index;
+    }
+
+    public void setKeepContentOnItemVisibilityChanged(boolean isKeepContentOnItemVisibilityChanged) {
+        this.isKeepContentOnItemVisibilityChanged = isKeepContentOnItemVisibilityChanged;
     }
 
     /**
@@ -129,6 +153,13 @@ public class VerticalPagerLayout extends LinearLayout {
      */
     public boolean isScrolling() {
         return this.isScrolling;
+    }
+
+    /**
+     * 设置本View是否可以上下手指拖动
+     */
+    public void setVerticalMoveEnabled(boolean movable) {
+        this.isVerticalMoveEnabled = movable;
     }
 
     public void addOnScrollListener(OnItemScrollListener listener) {
@@ -140,10 +171,10 @@ public class VerticalPagerLayout extends LinearLayout {
     }
 
     /**
-     * 设置本View是否可以上下手指拖动
+     * 获取上次停止滚动后停留在的item的index
      */
-    public void setVerticalMoveEnabled(boolean movable) {
-        this.isVerticalMoveEnabled = movable;
+    public int getLastSelectedItemIndex() {
+        return mLastSelectedItemIndex;
     }
 
     /**
@@ -156,7 +187,7 @@ public class VerticalPagerLayout extends LinearLayout {
                 mScrollableHeight);
         if (dy == 0) {
             if (!isFirstLayoutFinished) {
-                // 本View尚未完成layout时调用scrollToItemIndex将会无效，在这里暂时先保存其意图，待layout完成时再执行
+                // 本View尚未完成首次layout时调用scrollToItemIndex将会无效，在这里暂时先保存其意图，待layout完成时再执行
                 mIndex2ScrollBeforeLayout = index;
             }
             return;
@@ -167,13 +198,6 @@ public class VerticalPagerLayout extends LinearLayout {
         } else {
             quickScrollBy(dy);
         }
-    }
-
-    /**
-     * 获取上次停止滚动后停留在的item的index
-     */
-    public int getLastSelectedItemIndex() {
-        return mLastSelectedItemIndex;
     }
 
     /**
@@ -197,7 +221,7 @@ public class VerticalPagerLayout extends LinearLayout {
         if (!changed) {
             return;
         }
-        resetChildrenHeights();
+        resetChildrenStates();
         isFirstLayoutFinished = true;
     }
 
@@ -207,7 +231,7 @@ public class VerticalPagerLayout extends LinearLayout {
      * 2。如之前滑出了可见区域的子View变为visible，或者之前不可见的子View显示在了之前第一个显示在可见区域的上方时，
      * 需要保存当前view的内容scrollY不变，否则将出现内容"跳动"
      */
-    private void resetChildrenHeights() {
+    private void resetChildrenStates() {
         int contentHeight = ScrollComputeUtil.initContentHeights(mCurrentChildHeightsList, this);
         int myVisibleHeight = mVisibleHeight == 0 ? getHeight() : mVisibleHeight;
         mScrollableHeight = contentHeight - myVisibleHeight > 0 ? contentHeight - myVisibleHeight : 0;
@@ -215,9 +239,11 @@ public class VerticalPagerLayout extends LinearLayout {
         Logger.w(TAG, "contentHeight = " + contentHeight + ", myHeight = " + getHeight());
         Logger.w(TAG, "myVisibleHeight = " + myVisibleHeight + ", mScrollableHeight = " + mScrollableHeight);
 
-        // 处理子View可见行变化
-        if (!handleUnShownViewGone()) {
-            handleUnShownViewBecomeVisible();
+        if (isKeepContentOnItemVisibilityChanged) {
+            // 处理子View可见行变化
+            if (!handleUnShownViewGone()) {
+                handleUnShownViewBecomeVisible();
+            }
         }
 
         mLastChildHeightsList.clear();
@@ -227,10 +253,12 @@ public class VerticalPagerLayout extends LinearLayout {
             return;
         }
         if (mIndex2ScrollBeforeLayout >= 0) {
-            // 在本View第一次layout之前调用了scrollToItem()方法，此时完成其"夙愿"
+            // 在本View第一次layout之前调用了scrollToItem()方法，此时完成其"夙愿"，
+            // 目的：如不记录之前的"夙愿"，那么第一次layout之前的调用将看不到效果
             scrollToItem(mIndex2ScrollBeforeLayout, false);
         } else {
-            // 第一次layout，那么展示默认的item
+            // 第一次layout，那么展示默认的item，
+            // 目的：不设置将会在本次layout完成后，外部很快又调用了一次scrollToItem，感觉闪动
             scrollToItem(mDefaultSelectedItemIndex, false);
         }
     }
@@ -437,7 +465,15 @@ public class VerticalPagerLayout extends LinearLayout {
     }
 
     private void onActionUp() {
-        int dy = ScrollComputeUtil.computeAutoScrollDy(getScrollY(), mCurrentChildHeightsList, mScrollableHeight);
+        int dy;
+        if (isCrossItemDragEnabled) {
+            dy = ScrollComputeUtil.computeNonCrossItemAutoScrollDy(getScrollY(), mCurrentChildHeightsList,
+                    mScrollableHeight, mLastSelectedItemIndex);
+        } else {
+            dy = ScrollComputeUtil.computeCrossItemAutoScrollDy(getScrollY(), mCurrentChildHeightsList,
+                    mScrollableHeight);
+        }
+
         if (dy == 0) {
             onAutoScrollFinished();
         } else {
@@ -458,8 +494,8 @@ public class VerticalPagerLayout extends LinearLayout {
         final int oldY = getScrollY();
         final int currY = mScroller.getCurrY();
         final int finalY = mScroller.getFinalY();
-        Logger.d(TAG, "computeScroll: oldY = " + oldY + ", currY = " + currY + ", finalY = " + finalY +
-                ", isFinished = " + mScroller.isFinished());
+//        Logger.d(TAG, "computeScroll: oldY = " + oldY + ", currY = " + currY + ", finalY = " + finalY +
+//                ", isFinished = " + mScroller.isFinished());
 
         // 存在currY == finalY，但是isFinished = false，这时候还会继续调用1～2次computeScroll()的情况
         if (!mScroller.isFinished() || oldY != currY || currY != finalY) {
