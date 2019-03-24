@@ -1,15 +1,20 @@
-package com.leonxtp.library;
+package com.leonxtp.library.helper;
 
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.leonxtp.library.Logger;
+
 import java.util.List;
 
 /**
  * Created by LeonXtp on 2019/3/5 下午3:11
+ * <p>
+ * 原则上，不在各种工具类中对工具使用者中的数据进行变更，以提升代码可读性
+ * 本类中mChildHeightsList例外，因其只在这里会发生改变
  */
-public class ScrollComputeUtil {
+public class ComputeUtil {
 
     private static final String TAG = "VerticalPagerLayout";
 

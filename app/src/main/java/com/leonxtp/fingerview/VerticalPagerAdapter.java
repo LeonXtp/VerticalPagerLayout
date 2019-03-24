@@ -55,6 +55,11 @@ public class VerticalPagerAdapter extends PagerAdapter implements View.OnClickLi
         LockableScrollView lockableScrollView = rootView.findViewById(R.id.lockableScrollView);
 
         verticalPagerLayout = rootView.findViewById(R.id.vertical_pager_layout);
+
+        verticalPagerLayout.setCrossItemDragEnabled(true);
+        verticalPagerLayout.setDefaultSelectedItem(3);
+        verticalPagerLayout.setKeepContentOnItemVisibilityChanged(true);
+
         verticalPagerLayout.addOnScrollListener(new OnItemScrollListener() {
             @Override
             public void onItemScrolled(View firstVisibleItem, int firstVisibleItemIndex, float firstVisibleItemOffset) {
