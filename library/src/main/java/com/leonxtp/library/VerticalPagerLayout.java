@@ -225,6 +225,9 @@ public class VerticalPagerLayout extends LinearLayout {
         handleScrollToItemBeforeFirstLayout();
 
         isFirstLayoutFinished = true;
+
+        // 此时选中的item可能也已经发生了变化
+        onAutoScrollFinished();
     }
 
     /**
@@ -394,7 +397,7 @@ public class VerticalPagerLayout extends LinearLayout {
     }
 
     /**
-     * 当手指松开，本View自动滚动完成
+     * 当手指松开，本View自动滚动完成，或者子item可见行发生变化
      */
     public void onAutoScrollFinished() {
         Logger.d(TAG, "mScroller.isFinished(), isScrolling = false. ");
