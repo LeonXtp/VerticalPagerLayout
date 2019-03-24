@@ -11,11 +11,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Scroller;
 
-import com.leonxtp.library.helper.AutoScrollHelper;
-import com.leonxtp.library.helper.ComputeUtil;
-import com.leonxtp.library.helper.MoveScrollHelper;
-import com.leonxtp.library.helper.SubItemChangeHelper;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -256,12 +251,12 @@ public class VerticalPagerLayout extends LinearLayout {
         }
     }
 
-    public void quickScrollBy(int dy) {
+    void quickScrollBy(int dy) {
         scrollBy(0, dy);
         resetLastSelectedItem();
     }
 
-    public void smoothScrollBy(int dy) {
+    void smoothScrollBy(int dy) {
         mScroller.startScroll(0, getScrollY(), 0, dy, 300);
         ViewCompat.postInvalidateOnAnimation(this);
     }
@@ -399,7 +394,7 @@ public class VerticalPagerLayout extends LinearLayout {
     /**
      * 当手指松开，本View自动滚动完成，或者子item可见行发生变化
      */
-    public void onAutoScrollFinished() {
+    void onAutoScrollFinished() {
         Logger.d(TAG, "mScroller.isFinished(), isScrolling = false. ");
         isScrolling = false;
 
@@ -424,12 +419,12 @@ public class VerticalPagerLayout extends LinearLayout {
      *
      * @param moveY 本次手指滑动的y方向距离
      */
-    public void handleMoveListener(int moveY) {
+    void handleMoveListener(int moveY) {
         int targetScrollY = getScrollY() + moveY;
         handleAutoScrollListener(targetScrollY);
     }
 
-    public void handleAutoScrollListener(int currY) {
+    void handleAutoScrollListener(int currY) {
         if (currY < 0) {
             // 拉出顶部时的回弹，不处理
             return;

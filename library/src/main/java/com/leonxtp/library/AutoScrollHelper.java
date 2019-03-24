@@ -1,10 +1,7 @@
-package com.leonxtp.library.helper;
+package com.leonxtp.library;
 
 import android.support.v4.view.ViewCompat;
 import android.widget.Scroller;
-
-import com.leonxtp.library.Logger;
-import com.leonxtp.library.VerticalPagerLayout;
 
 import java.util.List;
 

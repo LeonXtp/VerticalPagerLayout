@@ -1,9 +1,6 @@
-package com.leonxtp.library.helper;
+package com.leonxtp.library;
 
 import android.widget.Scroller;
-
-import com.leonxtp.library.Logger;
-import com.leonxtp.library.VerticalPagerLayout;
 
 /**
  * Created by LeonXtp on 2019/3/24 上午11:21

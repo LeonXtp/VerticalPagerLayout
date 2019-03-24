@@ -1,8 +1,6 @@
-package com.leonxtp.library.helper;
+package com.leonxtp.library;
 
 import android.view.View;
-
-import com.leonxtp.library.VerticalPagerLayout;
 
 import java.util.List;
 
