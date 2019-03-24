@@ -56,7 +56,7 @@ public class VerticalPagerAdapter extends PagerAdapter implements View.OnClickLi
 
         verticalPagerLayout = rootView.findViewById(R.id.vertical_pager_layout);
 
-        verticalPagerLayout.setCrossItemDragEnabled(true);
+        verticalPagerLayout.setCrossItemDragEnabled(false);
         verticalPagerLayout.setDefaultSelectedItem(3);
         verticalPagerLayout.setKeepContentOnItemVisibilityChanged(true);
 

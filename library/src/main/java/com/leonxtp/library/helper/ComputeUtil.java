@@ -159,11 +159,15 @@ public class ComputeUtil {
 
         // 找到当前选中的item
         if (scrollY <= 0) {
-
-            // 当前选中的item直接就是第0个
+            // 当前选中的item也不一定就是第0个，而是从0开始第一个visible的item
             shownTopY = 0;
-            shownBottomY = childrenHeightList.get(0);
-            currShownIndex = 0;
+            for (int i = 0; i < childrenHeightList.size(); i++) {
+                if (childrenHeightList.get(i) > 0) {
+                    shownBottomY = childrenHeightList.get(i);
+                    currShownIndex = i;
+                    break;
+                }
+            }
         } else {
 
             // 找到当前显示的item的top和bottom和index
@@ -182,13 +186,15 @@ public class ComputeUtil {
 
         // 当前的item在之前的item上方
         if (currShownIndex < lastSelectedItemIndex) {
-            int aboveItemHeight = childrenHeightList.get(lastSelectedItemIndex - 1);
-            if ((currShownIndex == lastSelectedItemIndex - 1 && lastSelectedTopY - scrollY < aboveItemHeight / 2)) {
+            // 之前选中的item上方与当前选中的item之间有不可见的item
+            int firstVisibleItemIndexAbove = findFirstVisibleItemAbove(lastSelectedItemIndex, childrenHeightList);
+            int aboveItemHeight = childrenHeightList.get(firstVisibleItemIndexAbove);
+            if ((currShownIndex == firstVisibleItemIndexAbove && lastSelectedTopY - scrollY < aboveItemHeight / 2)) {
                 // 当前显示的是紧挨着上一个item的，且少于1/2，则回弹至原来的item
                 result = lastSelectedTopY - scrollY;
             } else {
                 // 达到或超过一半，则显示其上方的一个item
-                result = -(scrollY - (lastSelectedTopY - childrenHeightList.get(lastSelectedItemIndex - 1)));
+                result = -(scrollY - (lastSelectedTopY - childrenHeightList.get(firstVisibleItemIndexAbove)));
             }
 
         }
@@ -207,6 +213,25 @@ public class ComputeUtil {
 
         return result;
     }
+
+    /**
+     * 找到当前item上方第一个visible（可见，高度不为0）的子View的下标
+     *
+     * @param index 当前的item下标
+     */
+    private static int findFirstVisibleItemAbove(int index, List<Integer> childrenHeights) {
+        if (index == 0) {
+            return -1;
+        }
+        for (int i = index - 1; i >= 0; i--) {
+            if (childrenHeights.get(i) == 0) {
+                continue;
+            }
+            return i;
+        }
+        return -1;
+    }
+
 
     /**
      * 判断当手指在拖动View滚动的时候，是否需要加阻尼
@@ -342,5 +367,6 @@ public class ComputeUtil {
         }
         return -1;
     }
+
 
 }

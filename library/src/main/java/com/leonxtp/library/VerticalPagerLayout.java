@@ -72,7 +72,7 @@ public class VerticalPagerLayout extends LinearLayout {
     /**
      * 回弹时，是否可跨越子View拖动
      */
-    private boolean isCrossItemDragEnabled = true;
+    private boolean isCrossItemDragEnabled = false;
     /**
      * 当已滑出可见区域之外的子item的从{@link View#VISIBLE}变为{@link View#GONE}时，
      * 或者当前第一个展示的item且上方的所有item都为{@link View#GONE}，其上方的item从{@link View#GONE}变为{@link View#VISIBLE}时
