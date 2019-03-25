@@ -276,6 +276,34 @@ public class VerticalPagerLayout extends LinearLayout {
     private float previousTouchX, previousTouchY;
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        int action = ev.getAction();
+        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN ||
+                action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL ||
+                action == MotionEvent.ACTION_POINTER_UP) {
+            ensureOutLockableScrollViewContentOffset(this);
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    /**
+     * 递归检查防止因外层不可滚动的ScrollView导致scrollY出现异常
+     */
+    private void ensureOutLockableScrollViewContentOffset(View child) {
+        Object parent = child.getParent();
+        if (parent instanceof LockableScrollView) {
+            Logger.d(TAG, "parent instanceof LockableScrollView");
+            if (((LockableScrollView) parent).getScrollY() != 0) {
+                ((LockableScrollView) parent).setScrollY(0);
+            }
+            ensureOutLockableScrollViewContentOffset((View) parent);
+        } else if (parent instanceof View) {
+            Logger.d(TAG, "parent instanceof View");
+            ensureOutLockableScrollViewContentOffset((View) parent);
+        }
+    }
+
+    @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 
         boolean intercept = false;
