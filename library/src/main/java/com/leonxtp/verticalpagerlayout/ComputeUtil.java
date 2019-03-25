@@ -12,7 +12,7 @@ import java.util.List;
  * 原则上，不在各种工具类中对工具使用者中的数据进行变更，以提升代码可读性
  * 本类中mChildHeightsList例外，因其只在这里会发生改变
  */
-public class ComputeUtil {
+class ComputeUtil {
 
     private static final String TAG = "VerticalPagerLayout";
 
@@ -24,7 +24,7 @@ public class ComputeUtil {
      * @param parent            父容器
      * @return 所有子View的高度总和
      */
-    public static int initContentHeights(List<Integer> mChildHeightsList, LinearLayout parent) {
+    static int initContentHeights(List<Integer> mChildHeightsList, LinearLayout parent) {
         mChildHeightsList.clear();
         int mContentHeight = 0;
         for (int i = 0; i < parent.getChildCount(); i++) {
@@ -50,8 +50,8 @@ public class ComputeUtil {
      * @param scrollableHeight   父容器高度-所有子View的高度得到的一个可滚动的范围
      * @return 手指松开后自动滚动的距离
      */
-    public static int computeCrossItemAutoScrollDy(int scrollY, List<Integer> childrenHeightList,
-                                                   int scrollableHeight) {
+    static int computeCrossItemAutoScrollDy(int scrollY, List<Integer> childrenHeightList,
+                                            int scrollableHeight) {
 
         if (scrollY < 0) {
             // 下拉超出
@@ -125,8 +125,9 @@ public class ComputeUtil {
      * @param lastSelectedItemIndex 上次选中的item的下标
      * @return 手指松开后自动滚动的距离
      */
-    public static int computeNonCrossItemAutoScrollDy(int scrollY, List<Integer> childrenHeightList,
-                                                      int scrollableHeight, int lastSelectedItemIndex) {
+    static int computeNonCrossItemAutoScrollDy(int scrollY, List<Integer> childrenHeightList,
+                                               int scrollableHeight, int lastSelectedItemIndex,
+                                               boolean isFling, float velocityY) {
 
         if (lastSelectedItemIndex >= childrenHeightList.size()) {
             throw new IllegalArgumentException("astSelectedItemIndex >= childrenHeightList.size()");
@@ -187,7 +188,8 @@ public class ComputeUtil {
             // 之前选中的item上方与当前选中的item之间有不可见的item
             int firstVisibleItemIndexAbove = findFirstVisibleItemAbove(lastSelectedItemIndex, childrenHeightList);
             int aboveItemHeight = childrenHeightList.get(firstVisibleItemIndexAbove);
-            if ((currShownIndex == firstVisibleItemIndexAbove && lastSelectedTopY - scrollY < aboveItemHeight / 2)) {
+            if ((currShownIndex == firstVisibleItemIndexAbove && lastSelectedTopY - scrollY < aboveItemHeight / 2) &&
+                    !isFling) {
                 // 当前显示的是紧挨着上一个item的，且少于1/2，则回弹至原来的item
                 result = lastSelectedTopY - scrollY;
             } else {
@@ -208,19 +210,59 @@ public class ComputeUtil {
         }
         // 当前的item也正是之前的item
         else {
-            if (scrollY - shownTopY < childrenHeightList.get(currShownIndex) / 2) {
-                result = -(scrollY - shownTopY);
-            } else if (shownBottomY > scrollableHeight) {
-                // 等于或超过一半， 需要进击，但是如果完全进击，那么最底下的item已经不够高度了，
-                // 只能进击一部分，当最后的item显示完全就行
-                return scrollableHeight - scrollY;
+            if (isFling) {
+                result = onFling(velocityY, scrollY, shownTopY, shownBottomY, scrollableHeight);
             } else {
-                result = shownBottomY - scrollY;
+                result = onNormalActionUp(scrollY, shownTopY, childrenHeightList, currShownIndex, shownBottomY,
+                        scrollableHeight);
             }
         }
 
         return result;
     }
+
+    private static int onFling(float velocityY, int scrollY, int shownTopY, int shownBottomY, int scrollableHeight) {
+
+        int result = 0;
+
+        if (velocityY >= 0) {
+            // 下拉
+            if (scrollY <= 0) {
+                // 超出（首个item）
+                result = -scrollY;
+            } else {
+                result = -(scrollY - shownTopY);
+            }
+        } else if (shownBottomY > scrollableHeight) {
+            // 底部已经超出， 需要进击，但是如果完全进击，那么最底下的item已经不够高度了，
+            // 只能进击一部分，当最后的item显示完全就行
+            result = scrollableHeight - scrollY;
+        } else {
+            result = shownBottomY - scrollY;
+        }
+
+        return result;
+    }
+
+    private static int onNormalActionUp(int scrollY, int shownTopY, List<Integer> childrenHeightList, int
+            currShownIndex,
+                                        int shownBottomY, int scrollableHeight) {
+        int result = 0;
+
+        if ((scrollY - shownTopY < childrenHeightList.get(currShownIndex) / 2)) {
+            // 不是fling时的不到一半才回弹
+            result = -(scrollY - shownTopY);
+        } else if (shownBottomY > scrollableHeight) {
+            // 底部已经超出， 需要进击，但是如果完全进击，那么最底下的item已经不够高度了，
+            // 只能进击一部分，当最后的item显示完全就行
+            result = scrollableHeight - scrollY;
+        } else {
+            result = shownBottomY - scrollY;
+        }
+
+        return result;
+    }
+
 
     /**
      * 找到当前item上方第一个visible（可见，高度不为0）的子View的下标
@@ -248,7 +290,7 @@ public class ComputeUtil {
      * @param moveY            当次{@link android.view.MotionEvent}移动的垂直方向距离
      * @param scrollableHeight 父容器高度-所有子View的高度得到的一个可滚动的范围
      */
-    public static boolean isMoveOverScroll(int scrollY, float moveY, int scrollableHeight) {
+    static boolean isMoveOverScroll(int scrollY, float moveY, int scrollableHeight) {
         if (scrollY <= 0 && moveY < 0) {
             // 下拉超出
             return true;
@@ -263,8 +305,8 @@ public class ComputeUtil {
     /**
      * 获取要滑动到指定的item所需要的距离偏移量，需要考虑最后一个子View已经到底到情况
      */
-    public static int getDyForScrollToIndex(List<Integer> childrenHeightList, int targetItemIndex,
-                                            int scrollY, int scrollableHeight) {
+    static int getDyForScrollToIndex(List<Integer> childrenHeightList, int targetItemIndex,
+                                     int scrollY, int scrollableHeight) {
         if (targetItemIndex >= childrenHeightList.size()) {
             return 0;
         }
@@ -308,7 +350,7 @@ public class ComputeUtil {
      * @return float数组，第0个是第一个显示的子View的下标
      * 第1个是第一个子View显示高度占其自身高度的百分比，float类型，[0, 1]
      */
-    public static float[] findFirstShownItem(List<Integer> childrenHeightList, int targetScrollY) {
+    static float[] findFirstShownItem(List<Integer> childrenHeightList, int targetScrollY) {
         float itemIdex = 0;
         int itemHeight = 0;
         int bottomY = 0;
@@ -330,7 +372,7 @@ public class ComputeUtil {
     /**
      * 找到在因滑出后看不见的，第一个设为了{@link View#GONE}的子View的高度
      */
-    public static int findGoneViewWhenNotShown(List<Integer> childrenHeightList, List<Integer> lastChildrenHeightList) {
+    static int findGoneViewWhenNotShown(List<Integer> childrenHeightList, List<Integer> lastChildrenHeightList) {
         if (childrenHeightList.size() != lastChildrenHeightList.size()) {
             return -1;
         }
@@ -354,8 +396,8 @@ public class ComputeUtil {
     /**
      * 找到在因滑出后看不见的，第一个设为了{@link View#VISIBLE}的子View的高度
      */
-    public static int findBecomeVisibleViewWhenNotShown(List<Integer> childrenHeightList,
-                                                        List<Integer> lastChildrenHeightList) {
+    static int findBecomeVisibleViewWhenNotShown(List<Integer> childrenHeightList,
+                                                 List<Integer> lastChildrenHeightList) {
         if (childrenHeightList.size() != lastChildrenHeightList.size()) {
             return -1;
         }

@@ -9,7 +9,7 @@ import java.util.List;
  * <p>
  * 原则上，不在各种工具类中对工具使用者中的数据进行变更，以提升代码可读性
  */
-public class SubItemChangeHelper {
+class SubItemChangeHelper {
 
     /**
      * 每次layout完成后，如子View有变化，
@@ -24,11 +24,11 @@ public class SubItemChangeHelper {
      * @param lastSelectedItemIndex                {@link View#onLayout(boolean, int, int, int, int)}中isChanged为true时，
      *                                             之前选中的item下标
      */
-    public static void handleSubItemChanged(VerticalPagerLayout verticalPagerLayout,
-                                            boolean isKeepContentOnItemVisibilityChanged,
-                                            List<Integer> lastChildrenHeights,
-                                            List<Integer> currentChildrenHeights,
-                                            int lastSelectedItemIndex) {
+    static void handleSubItemChanged(VerticalPagerLayout verticalPagerLayout,
+                                     boolean isKeepContentOnItemVisibilityChanged,
+                                     List<Integer> lastChildrenHeights,
+                                     List<Integer> currentChildrenHeights,
+                                     int lastSelectedItemIndex) {
 
         if (!isKeepContentOnItemVisibilityChanged) {
             return;

@@ -9,47 +9,48 @@ import java.util.List;
 /**
  * Created by LeonXtp on 2019/3/24 下午12:24
  */
-public class AutoScrollHelper {
+class AutoScrollHelper {
 
     private static final String TAG = "VerticalPagerLayout";
 
-    public static void onActionUp(VerticalPagerLayout verticalPagerLayout,
-                                  VelocityTracker velocityTracker,
-                                  int maximumFlingVelocity,
-                                  boolean isCrossItemDragEnabled,
-                                  List<Integer> mCurrentChildrenHeights,
-                                  int mScrollableHeight,
-                                  int mLastSelectedItemIndex) {
+    /**
+     * 处理action_up
+     */
+    static void onActionUp(VerticalPagerLayout verticalPagerLayout,
+                           VelocityTracker velocityTracker,
+                           int maximumFlingVelocity,
+                           boolean isCrossItemDragEnabled,
+                           List<Integer> mCurrentChildrenHeights,
+                           int mScrollableHeight,
+                           int mLastSelectedItemIndex) {
 
         final float velocityY = velocityTracker.getYVelocity();
         final float velocityX = velocityTracker.getXVelocity();
         Logger.d(TAG, "velocityY=" + velocityY + ", velocityX=" + velocityX + ", maximumFlingVelocity=" +
                 maximumFlingVelocity);
-        if ((Math.abs(velocityY) > maximumFlingVelocity * 0.3f)
+        if ((Math.abs(velocityY) > maximumFlingVelocity * 0.1f)
                 && (Math.abs(velocityY) > Math.abs(velocityX) * 0.5f)) {
             Logger.d(TAG, "onFling...");
-
             onActionUp(verticalPagerLayout, isCrossItemDragEnabled, mCurrentChildrenHeights, mScrollableHeight,
-                    mLastSelectedItemIndex);
-
+                    mLastSelectedItemIndex, true, velocityY);
         } else {
-            Logger.d(TAG, "onActionUp...");
-
+            Logger.d(TAG, "not onFling...");
             onActionUp(verticalPagerLayout, isCrossItemDragEnabled, mCurrentChildrenHeights, mScrollableHeight,
-                    mLastSelectedItemIndex);
+                    mLastSelectedItemIndex, false, velocityY);
         }
-
     }
 
-    public static void onActionUp(VerticalPagerLayout verticalPagerLayout,
-                                  boolean isCrossItemDragEnabled,
-                                  List<Integer> mCurrentChildrenHeights,
-                                  int mScrollableHeight,
-                                  int mLastSelectedItemIndex) {
+    private static void onActionUp(VerticalPagerLayout verticalPagerLayout,
+                                   boolean isCrossItemDragEnabled,
+                                   List<Integer> mCurrentChildrenHeights,
+                                   int mScrollableHeight,
+                                   int mLastSelectedItemIndex,
+                                   boolean isFling,
+                                   float velocityY) {
         int dy;
         if (!isCrossItemDragEnabled) {
             dy = ComputeUtil.computeNonCrossItemAutoScrollDy(verticalPagerLayout.getScrollY(), mCurrentChildrenHeights,
-                    mScrollableHeight, mLastSelectedItemIndex);
+                    mScrollableHeight, mLastSelectedItemIndex, isFling, velocityY);
         } else {
             dy = ComputeUtil.computeCrossItemAutoScrollDy(verticalPagerLayout.getScrollY(), mCurrentChildrenHeights,
                     mScrollableHeight);
@@ -63,12 +64,7 @@ public class AutoScrollHelper {
         }
     }
 
-    public static void onActionFling(VerticalPagerLayout verticalPagerLayout,
-                                     int velocityY) {
-
-    }
-
-    public static void computeScroll(VerticalPagerLayout verticalPagerLayout, Scroller scroller) {
+    static void computeScroll(VerticalPagerLayout verticalPagerLayout, Scroller scroller) {
         // 在mScroller没有startScroll的时候，它也会执行
         if (!scroller.computeScrollOffset()) {
             return;

@@ -5,7 +5,7 @@ import android.widget.Scroller;
 /**
  * Created by LeonXtp on 2019/3/24 上午11:21
  */
-public class MoveScrollHelper {
+class MoveScrollHelper {
 
     private static final String TAG = "VerticalPagerLayout";
 
@@ -14,7 +14,7 @@ public class MoveScrollHelper {
      */
     private static final float OVER_SCROLL_DAMPING_COEFFICIENT = 0.2f;
 
-    public static void onActionDown(Scroller scroller) {
+    static void onActionDown(Scroller scroller) {
         if (!scroller.isFinished()) {
             Logger.d(TAG, "onActionDown, mScroller.abortAnimation()");
             scroller.abortAnimation();
@@ -26,7 +26,7 @@ public class MoveScrollHelper {
      *
      * @param moveY 手指滑动的距离，向上为"+"， 向下为"-"。
      */
-    public static void onMoveVertical(VerticalPagerLayout verticalPagerLayout, int scrollableHeight, float moveY) {
+    static void onMoveVertical(VerticalPagerLayout verticalPagerLayout, int scrollableHeight, float moveY) {
         int scrollY = verticalPagerLayout.getScrollY();
         if (ComputeUtil.isMoveOverScroll(scrollY, moveY, scrollableHeight)) {
             // 需要加阻尼

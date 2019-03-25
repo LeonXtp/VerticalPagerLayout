@@ -28,7 +28,7 @@ uploadArchives {
             }
             pom.project {
                 name 'verticalpagerlayout'
-                version '0.0.3'
+                version '0.0.4'
                 artifactId 'verticalpagerlayout'
                 groupId 'com.leonxtp.verticalpagerlayout'
                 packaging 'aar'
