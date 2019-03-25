@@ -4,8 +4,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.leonxtp.library.Logger;
-
 import java.util.List;
 
 /**
