@@ -1,4 +1,4 @@
-package com.leonxtp.library;
+package com.leonxtp.verticalpagerlayout;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

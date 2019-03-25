@@ -4,12 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.leonxtp.library.LockableScrollView
+    <com.leonxtp.verticalpagerlayout.LockableScrollView
         android:id="@+id/lockableScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.leonxtp.library.VerticalPagerLayout
+        <com.leonxtp.verticalpagerlayout.VerticalPagerLayout
             android:id="@+id/vertical_pager_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -75,8 +75,8 @@
                 android:layout_height="400dp"
                 android:background="#8c7ec6" />
 
-        </com.leonxtp.library.VerticalPagerLayout>
+        </com.leonxtp.verticalpagerlayout.VerticalPagerLayout>
 
-    </com.leonxtp.library.LockableScrollView>
+    </com.leonxtp.verticalpagerlayout.LockableScrollView>
 
 </FrameLayout>

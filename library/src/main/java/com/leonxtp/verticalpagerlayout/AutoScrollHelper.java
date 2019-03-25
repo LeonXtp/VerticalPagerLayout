@@ -1,4 +1,4 @@
-package com.leonxtp.library;
+package com.leonxtp.verticalpagerlayout;
 
 import android.support.v4.view.ViewCompat;
 import android.widget.Scroller;

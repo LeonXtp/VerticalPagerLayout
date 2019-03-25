@@ -11,10 +11,10 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.leonxtp.library.Logger;
-import com.leonxtp.library.OnItemScrollListener;
-import com.leonxtp.library.VerticalPagerLayout;
-import com.leonxtp.library.LockableScrollView;
+import com.leonxtp.verticalpagerlayout.Logger;
+import com.leonxtp.verticalpagerlayout.OnItemScrollListener;
+import com.leonxtp.verticalpagerlayout.VerticalPagerLayout;
+import com.leonxtp.verticalpagerlayout.LockableScrollView;
 
 /**
  * Created by LeonXtp on 2019/3/6 下午9:26

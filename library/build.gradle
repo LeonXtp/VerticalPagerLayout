@@ -1,11 +1,7 @@
 apply plugin: 'com.android.library'
-// for bintray release
-apply from: 'bintray.gradle'
 
 android {
     compileSdkVersion 27
-
-
 
     defaultConfig {
         minSdkVersion 15
