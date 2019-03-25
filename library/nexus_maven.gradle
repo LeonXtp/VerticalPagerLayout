@@ -24,7 +24,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: "http://10.100.0.245:8081/nexus/content/repositories/releases/") {
-                authentication(userName: "admin", password: "admin123")
+                authentication(userName: "", password: "")
             }
             pom.project {
                 name 'verticalpagerlayout'
