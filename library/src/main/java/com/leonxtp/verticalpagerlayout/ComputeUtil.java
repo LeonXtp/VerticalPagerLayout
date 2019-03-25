@@ -198,12 +198,22 @@ public class ComputeUtil {
         }
         // 当前的item在之前item的下方，直接弹至其下方的item即可
         else if (currShownIndex > lastSelectedItemIndex) {
-            result = -(scrollY - lastSelectedBottomY);
+            if (shownBottomY > scrollableHeight && currShownIndex == lastSelectedItemIndex + 1) {
+                // 等于或超过一半， 需要进击，但是如果完全进击，那么最底下的item已经不够高度了，
+                // 只能进击一部分，当最后的item显示完全就行
+                result = scrollableHeight - scrollY;
+            } else {
+                result = -(scrollY - lastSelectedBottomY);
+            }
         }
         // 当前的item也正是之前的item
         else {
             if (scrollY - shownTopY < childrenHeightList.get(currShownIndex) / 2) {
                 result = -(scrollY - shownTopY);
+            } else if (shownBottomY > scrollableHeight) {
+                // 等于或超过一半， 需要进击，但是如果完全进击，那么最底下的item已经不够高度了，
+                // 只能进击一部分，当最后的item显示完全就行
+                return scrollableHeight - scrollY;
             } else {
                 result = shownBottomY - scrollY;
             }

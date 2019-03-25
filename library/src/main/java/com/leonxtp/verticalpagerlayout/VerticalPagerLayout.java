@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.LinearLayout;
@@ -115,6 +116,7 @@ public class VerticalPagerLayout extends LinearLayout {
     private void init(Context context) {
         mScroller = new Scroller(context);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        mMaximumFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
     }
 
     //<editor-fold desc="public methods">
@@ -266,8 +268,8 @@ public class VerticalPagerLayout extends LinearLayout {
      */
     private void resetLastSelectedItem() {
         float[] firstVisibleItemInfo = ComputeUtil.findFirstShownItem(mCurrentChildrenHeights, getScrollY());
-        mLastSelectedItemIndex = (int) firstVisibleItemInfo[1] > 0.5 ?
-                (int) firstVisibleItemInfo[0] : (int) firstVisibleItemInfo[0] + 1;
+        mLastSelectedItemIndex = getScrollY() != mScrollableHeight && (int) firstVisibleItemInfo[1] < 0.1f ?
+                (int) firstVisibleItemInfo[0] + 1 : (int) firstVisibleItemInfo[0];
         Logger.d(TAG, "mLastSelectedItemIndex = " + mLastSelectedItemIndex);
     }
 
@@ -292,13 +294,11 @@ public class VerticalPagerLayout extends LinearLayout {
     private void ensureOutLockableScrollViewContentOffset(View child) {
         Object parent = child.getParent();
         if (parent instanceof LockableScrollView) {
-            Logger.d(TAG, "parent instanceof LockableScrollView");
             if (((LockableScrollView) parent).getScrollY() != 0) {
                 ((LockableScrollView) parent).setScrollY(0);
             }
             ensureOutLockableScrollViewContentOffset((View) parent);
         } else if (parent instanceof View) {
-            Logger.d(TAG, "parent instanceof View");
             ensureOutLockableScrollViewContentOffset((View) parent);
         }
     }
@@ -347,9 +347,18 @@ public class VerticalPagerLayout extends LinearLayout {
         return intercept;
     }
 
+    private VelocityTracker mVelocityTracker;
+    private int mMaximumFlingVelocity;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(ev);
+
         boolean handled = true;
 
         int action = ev.getAction();
@@ -398,8 +407,11 @@ public class VerticalPagerLayout extends LinearLayout {
                 Logger.w(TAG, "onTouchEvent ACTION_CANCEL");
             case MotionEvent.ACTION_UP:
                 Logger.w(TAG, "onTouchEvent ACTION_UP");
-                AutoScrollHelper.onActionUp(this, isCrossItemDragEnabled, mCurrentChildrenHeights,
-                        mScrollableHeight, mLastSelectedItemIndex);
+
+                final VelocityTracker velocityTracker = mVelocityTracker;
+                velocityTracker.computeCurrentVelocity(1000, mMaximumFlingVelocity);
+                AutoScrollHelper.onActionUp(VerticalPagerLayout.this, velocityTracker, mMaximumFlingVelocity,
+                        isCrossItemDragEnabled, mCurrentChildrenHeights, mScrollableHeight, mLastSelectedItemIndex);
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 isPointerActionTriggered = true;
@@ -428,8 +440,9 @@ public class VerticalPagerLayout extends LinearLayout {
 
         float[] firstVisibleItemInfo = ComputeUtil.findFirstShownItem(mCurrentChildrenHeights, getScrollY());
         // 这里因为会存在一种情况，滑动停止时，它并没有完全滚动到位，就差那么几个像素
-        int firstVisibleItemIndex = (int) firstVisibleItemInfo[1] > 0.5 ?
-                (int) firstVisibleItemInfo[0] : (int) firstVisibleItemInfo[0] + 1;
+        // 但是又要排除是最后一个item的情况
+        int firstVisibleItemIndex = getScrollY() != mScrollableHeight && (int) firstVisibleItemInfo[1] < 0.1f ?
+                (int) firstVisibleItemInfo[0] + 1 : (int) firstVisibleItemInfo[0];
         if (firstVisibleItemIndex == mLastSelectedItemIndex) {
             // 防止itemIndex没有变化时多次回调
             return;
@@ -438,7 +451,7 @@ public class VerticalPagerLayout extends LinearLayout {
 
         if (mOnItemScrollListener != null) {
             mOnItemScrollListener.onItemSelected(
-                    getChildAt((int) firstVisibleItemInfo[0]), (int) firstVisibleItemInfo[0]);
+                    getChildAt(firstVisibleItemIndex), (int) firstVisibleItemInfo[0]);
         }
     }
 

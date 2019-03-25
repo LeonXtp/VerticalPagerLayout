@@ -1,6 +1,7 @@
 package com.leonxtp.verticalpagerlayout;
 
 import android.support.v4.view.ViewCompat;
+import android.view.VelocityTracker;
 import android.widget.Scroller;
 
 import java.util.List;
@@ -11,6 +12,34 @@ import java.util.List;
 public class AutoScrollHelper {
 
     private static final String TAG = "VerticalPagerLayout";
+
+    public static void onActionUp(VerticalPagerLayout verticalPagerLayout,
+                                  VelocityTracker velocityTracker,
+                                  int maximumFlingVelocity,
+                                  boolean isCrossItemDragEnabled,
+                                  List<Integer> mCurrentChildrenHeights,
+                                  int mScrollableHeight,
+                                  int mLastSelectedItemIndex) {
+
+        final float velocityY = velocityTracker.getYVelocity();
+        final float velocityX = velocityTracker.getXVelocity();
+        Logger.d(TAG, "velocityY=" + velocityY + ", velocityX=" + velocityX + ", maximumFlingVelocity=" +
+                maximumFlingVelocity);
+        if ((Math.abs(velocityY) > maximumFlingVelocity * 0.3f)
+                && (Math.abs(velocityY) > Math.abs(velocityX) * 0.5f)) {
+            Logger.d(TAG, "onFling...");
+
+            onActionUp(verticalPagerLayout, isCrossItemDragEnabled, mCurrentChildrenHeights, mScrollableHeight,
+                    mLastSelectedItemIndex);
+
+        } else {
+            Logger.d(TAG, "onActionUp...");
+
+            onActionUp(verticalPagerLayout, isCrossItemDragEnabled, mCurrentChildrenHeights, mScrollableHeight,
+                    mLastSelectedItemIndex);
+        }
+
+    }
 
     public static void onActionUp(VerticalPagerLayout verticalPagerLayout,
                                   boolean isCrossItemDragEnabled,
@@ -32,6 +61,11 @@ public class AutoScrollHelper {
             Logger.d(TAG, "startScroll...dy = " + dy);
             verticalPagerLayout.smoothScrollBy(dy);
         }
+    }
+
+    public static void onActionFling(VerticalPagerLayout verticalPagerLayout,
+                                     int velocityY) {
+
     }
 
     public static void computeScroll(VerticalPagerLayout verticalPagerLayout, Scroller scroller) {
