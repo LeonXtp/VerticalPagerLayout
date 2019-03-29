@@ -36,7 +36,8 @@ class SubItemChangeHelper {
         // 处理子View可见性变化
         if (!handleUnShownViewGone(verticalPagerLayout, lastChildrenHeights, currentChildrenHeights,
                 lastSelectedItemIndex)) {
-            handleUnShownViewBecomeVisible(verticalPagerLayout, lastChildrenHeights, currentChildrenHeights);
+            handleUnShownViewBecomeVisible(verticalPagerLayout, lastChildrenHeights, currentChildrenHeights,
+                    lastSelectedItemIndex);
         }
     }
 
@@ -55,7 +56,7 @@ class SubItemChangeHelper {
         // 确定变为gone的view是否在滑出可见区域的时候变的
         for (int i = 0; i < goneItemIndexes.size(); i++) {
             int index = goneItemIndexes.get(i);
-            if (index != -1 && index < lastSelectedItemIndex) {
+            if (index < lastSelectedItemIndex) {
                 goneViewHeight += lastChildrenHeights.get(index);
             }
         }
@@ -73,7 +74,8 @@ class SubItemChangeHelper {
      */
     private static void handleUnShownViewBecomeVisible(VerticalPagerLayout verticalPagerLayout,
                                                        List<Integer> lastChildrenHeights,
-                                                       List<Integer> currentChildrenHeights) {
+                                                       List<Integer> currentChildrenHeights,
+                                                       int lastSelectedItemIndex) {
         List<Integer> visibleItemIndexes = ComputeUtil.findBecomeVisibleViewWhenNotShown(currentChildrenHeights,
                 lastChildrenHeights);
 
@@ -82,7 +84,9 @@ class SubItemChangeHelper {
         // 确定变为gone的view是否在滑出可见区域的时候变的
         for (int i = 0; i < visibleItemIndexes.size(); i++) {
             int index = visibleItemIndexes.get(i);
-            visibleViewHeight = currentChildrenHeights.get(index);
+            if (index < lastSelectedItemIndex) {
+                visibleViewHeight = currentChildrenHeights.get(index);
+            }
         }
 
         if (visibleViewHeight != 0) {
