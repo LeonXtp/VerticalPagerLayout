@@ -49,11 +49,15 @@ class SubItemChangeHelper {
                                                  List<Integer> currentChildrenHeights,
                                                  int lastSelectedItemIndex) {
         // 找到设置为gone的item下标
-        int goneItemIndex = ComputeUtil.findGoneViewWhenNotShown(currentChildrenHeights, lastChildrenHeights);
+        List<Integer> goneItemIndexes = ComputeUtil.findGoneViewWhenNotShown(currentChildrenHeights,
+                lastChildrenHeights);
         int goneViewHeight = 0;
         // 确定变为gone的view是否在滑出可见区域的时候变的
-        if (goneItemIndex != -1 && goneItemIndex < lastSelectedItemIndex) {
-            goneViewHeight = lastChildrenHeights.get(goneItemIndex);
+        for (int i = 0; i < goneItemIndexes.size(); i++) {
+            int index = goneItemIndexes.get(i);
+            if (index != -1 && index < lastSelectedItemIndex) {
+                goneViewHeight += lastChildrenHeights.get(index);
+            }
         }
 
         if (goneViewHeight != 0) {
