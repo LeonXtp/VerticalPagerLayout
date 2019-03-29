@@ -174,6 +174,10 @@ public class VerticalPagerLayout extends LinearLayout {
         return mLastSelectedItemIndex;
     }
 
+    public void setLogging(boolean isLogging) {
+        Logger.setLogging(isLogging);
+    }
+
     /**
      * 滚动到指定位置的item，当这个item不可见时（此时该item高度为0），将会展示其下面当一个item
      *
@@ -268,7 +272,7 @@ public class VerticalPagerLayout extends LinearLayout {
      */
     private void resetLastSelectedItem() {
         float[] firstVisibleItemInfo = ComputeUtil.findFirstShownItem(mCurrentChildrenHeights, getScrollY());
-        mLastSelectedItemIndex = getScrollY() != mScrollableHeight && (int) firstVisibleItemInfo[1] < 0.1f ?
+        mLastSelectedItemIndex = getScrollY() != mScrollableHeight && firstVisibleItemInfo[1] < 0.1f ?
                 (int) firstVisibleItemInfo[0] + 1 : (int) firstVisibleItemInfo[0];
         Logger.d(TAG, "mLastSelectedItemIndex = " + mLastSelectedItemIndex);
     }
@@ -441,13 +445,14 @@ public class VerticalPagerLayout extends LinearLayout {
         float[] firstVisibleItemInfo = ComputeUtil.findFirstShownItem(mCurrentChildrenHeights, getScrollY());
         // 这里因为会存在一种情况，滑动停止时，它并没有完全滚动到位，就差那么几个像素
         // 但是又要排除是最后一个item的情况
-        int firstVisibleItemIndex = getScrollY() != mScrollableHeight && (int) firstVisibleItemInfo[1] < 0.1f ?
+        int firstVisibleItemIndex = getScrollY() != mScrollableHeight && firstVisibleItemInfo[1] < 0.1f ?
                 (int) firstVisibleItemInfo[0] + 1 : (int) firstVisibleItemInfo[0];
         if (firstVisibleItemIndex == mLastSelectedItemIndex) {
             // 防止itemIndex没有变化时多次回调
             return;
         }
         mLastSelectedItemIndex = firstVisibleItemIndex;
+        Logger.d(TAG, "mLastSelectedItemIndex = " + mLastSelectedItemIndex);
 
         if (mOnItemScrollListener != null) {
             mOnItemScrollListener.onItemSelected(

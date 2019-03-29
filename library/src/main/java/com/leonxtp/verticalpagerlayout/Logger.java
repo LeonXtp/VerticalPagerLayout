@@ -9,6 +9,10 @@ public class Logger {
 
     public static boolean logging = true;
 
+    public static void setLogging(boolean isLogging) {
+        logging = isLogging;
+    }
+
     public static void d(String tag, String msg) {
         if (logging) {
             Log.d(tag, msg);
