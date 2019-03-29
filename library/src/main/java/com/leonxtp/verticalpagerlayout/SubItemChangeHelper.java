@@ -85,7 +85,7 @@ class SubItemChangeHelper {
         for (int i = 0; i < visibleItemIndexes.size(); i++) {
             int index = visibleItemIndexes.get(i);
             if (index < lastSelectedItemIndex) {
-                visibleViewHeight = currentChildrenHeights.get(index);
+                visibleViewHeight += currentChildrenHeights.get(index);
             }
         }
 
