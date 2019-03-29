@@ -371,7 +371,7 @@ class ComputeUtil {
     }
 
     /**
-     * 找到在因滑出后看不见的，第一个设为了{@link View#GONE}的子View的高度
+     * 找到在因滑出后看不见的，第一组连续的设为了{@link View#GONE}的子View的高度
      *
      * @return 那些被削掉了"头部"的index们
      */
@@ -399,12 +399,13 @@ class ComputeUtil {
     }
 
     /**
-     * 找到在因滑出后看不见的，第一个设为了{@link View#VISIBLE}的子View的高度
+     * 找到原本看不见的，第一组连续设为了{@link View#VISIBLE}的子View的高度
      */
-    static int findBecomeVisibleViewWhenNotShown(List<Integer> childrenHeightList,
-                                                 List<Integer> lastChildrenHeightList) {
+    static List<Integer> findBecomeVisibleViewWhenNotShown(List<Integer> childrenHeightList,
+                                                           List<Integer> lastChildrenHeightList) {
+        List<Integer> result = new ArrayList<>();
         if (childrenHeightList.size() != lastChildrenHeightList.size()) {
-            return -1;
+            return result;
         }
 
         for (int i = 0; i < lastChildrenHeightList.size(); i++) {
@@ -417,10 +418,10 @@ class ComputeUtil {
                 continue;
             }
             // 当前遍历到的子View为gone，而之前不是gone，那么找到你了！
-            return i;
+            result.add(i);
 
         }
-        return -1;
+        return result;
     }
 
 

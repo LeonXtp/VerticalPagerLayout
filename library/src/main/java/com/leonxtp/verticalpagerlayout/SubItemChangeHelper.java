@@ -74,13 +74,15 @@ class SubItemChangeHelper {
     private static void handleUnShownViewBecomeVisible(VerticalPagerLayout verticalPagerLayout,
                                                        List<Integer> lastChildrenHeights,
                                                        List<Integer> currentChildrenHeights) {
-        int visibleItemIndex = ComputeUtil.findBecomeVisibleViewWhenNotShown(currentChildrenHeights,
+        List<Integer> visibleItemIndexes = ComputeUtil.findBecomeVisibleViewWhenNotShown(currentChildrenHeights,
                 lastChildrenHeights);
 
         int visibleViewHeight = 0;
         // 确定变为gone的view是否在滑出可见区域的时候变的
-        if (visibleItemIndex != -1) {
-            visibleViewHeight = currentChildrenHeights.get(visibleItemIndex);
+        // 确定变为gone的view是否在滑出可见区域的时候变的
+        for (int i = 0; i < visibleItemIndexes.size(); i++) {
+            int index = visibleItemIndexes.get(i);
+            visibleViewHeight = currentChildrenHeights.get(index);
         }
 
         if (visibleViewHeight != 0) {
