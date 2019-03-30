@@ -9,12 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.leonxtp.verticalpagerlayout.Logger;
 import com.leonxtp.verticalpagerlayout.OnItemScrollListener;
 import com.leonxtp.verticalpagerlayout.VerticalPagerLayout;
 import com.leonxtp.verticalpagerlayout.LockableScrollView;
+
+import org.w3c.dom.Text;
 
 /**
  * Created by LeonXtp on 2019/3/6 下午9:26
@@ -99,23 +102,24 @@ public class VerticalPagerAdapter extends PagerAdapter implements View.OnClickLi
 
         // 动态设置第二个View高度
         if (v.getId() == R.id.id0) {
-            View setSizeView = verticalPagerLayout.findViewById(R.id.id1);
-            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) setSizeView.getLayoutParams();
+            TextView tv1 = verticalPagerLayout.findViewById(R.id.id1);
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) tv1.getLayoutParams();
             if (layoutParams.height == 500) {
                 layoutParams.height = 100;
             } else {
                 layoutParams.height = 500;
             }
-            setSizeView.setLayoutParams(layoutParams);
+            tv1.setLayoutParams(layoutParams);
             Toast.makeText(context, "2nd view size changed", Toast.LENGTH_SHORT).show();
         }
 
         // 设置第三个view的可见行
         if (v.getId() == R.id.id1) {
-            if (verticalPagerLayout.findViewById(R.id.id2).getVisibility() == View.VISIBLE) {
-                verticalPagerLayout.findViewById(R.id.id2).setVisibility(View.GONE);
+            TextView tv2 = verticalPagerLayout.findViewById(R.id.id2);
+            if (tv2.getVisibility() == View.VISIBLE) {
+                tv2.setVisibility(View.GONE);
             } else {
-                verticalPagerLayout.findViewById(R.id.id2).setVisibility(View.VISIBLE);
+                tv2.setVisibility(View.VISIBLE);
             }
             Toast.makeText(context, "3rd view visibility changed", Toast.LENGTH_SHORT).show();
         }
@@ -137,7 +141,7 @@ public class VerticalPagerAdapter extends PagerAdapter implements View.OnClickLi
                         }
                     });
                 }
-                ((ViewGroup) verticalPagerLayout.findViewById(R.id.vertical_pager_layout)).addView(scrollView, 3);
+                verticalPagerLayout.addView(scrollView, 3);
                 isScrollViewAdded = true;
                 Toast.makeText(context, "ScrollView added", Toast.LENGTH_SHORT).show();
                 return;
@@ -158,12 +162,25 @@ public class VerticalPagerAdapter extends PagerAdapter implements View.OnClickLi
 
         // 第一个View可见行
         if (v.getId() == R.id.id3) {
-            if (verticalPagerLayout.findViewById(R.id.id0).getVisibility() == View.VISIBLE) {
-                verticalPagerLayout.findViewById(R.id.id0).setVisibility(View.GONE);
+            TextView tv0 = verticalPagerLayout.findViewById(R.id.id0);
+            if (tv0.getVisibility() == View.VISIBLE) {
+                tv0.setVisibility(View.GONE);
             } else {
-                verticalPagerLayout.findViewById(R.id.id0).setVisibility(View.VISIBLE);
+                tv0.setVisibility(View.VISIBLE);
             }
             Toast.makeText(context, "1st view visibility changed", Toast.LENGTH_SHORT).show();
+        }
+
+        if (v.getId() == R.id.id4) {
+            TextView tv3 = verticalPagerLayout.findViewById(R.id.id3);
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) tv3.getLayoutParams();
+            if (layoutParams.height == 500) {
+                layoutParams.height = 100;
+            } else {
+                layoutParams.height = 500;
+            }
+            tv3.setLayoutParams(layoutParams);
+            Toast.makeText(context, "4th view size changed", Toast.LENGTH_SHORT).show();
         }
 
     }

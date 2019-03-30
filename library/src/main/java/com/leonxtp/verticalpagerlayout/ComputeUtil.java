@@ -370,59 +370,20 @@ class ComputeUtil {
 
     }
 
-    /**
-     * 找到在因滑出后看不见的，第一组连续的设为了{@link View#GONE}的子View的高度
-     *
-     * @return 那些被削掉了"头部"的index们
-     */
-    static List<Integer> findGoneViewWhenNotShown(List<Integer> childrenHeightList, List<Integer>
-            lastChildrenHeightList) {
-        List<Integer> result = new ArrayList<>();
-        if (childrenHeightList.size() != lastChildrenHeightList.size()) {
-            return result;
+    static int dyForUnShownHeightChange(List<Integer> currChildrenHeightList, List<Integer> lastChildrenHeightList,
+                                        int lastSelectedItemIndex) {
+
+        if (lastSelectedItemIndex >= lastChildrenHeightList.size() ||
+                lastSelectedItemIndex >= currChildrenHeightList.size()) {
+            return 0;
         }
 
-        for (int i = 0; i < childrenHeightList.size(); i++) {
-            if (childrenHeightList.get(i) != 0) {
-                // 从上往下，只要遇到不等于0，就是visible的，就不用找了，没有
-                break;
-            }
-            if (lastChildrenHeightList.get(i) == 0) {
-                // 当前这个子view为gone，而如果之前也是gone，说明不是这个，继续
-                continue;
-            }
-            // 当前遍历到的子View为gone，而之前不是gone，那么找到你了！
-            result.add(i);
+        int lastHeightAboveSelectedItem = 0, currHeigtAboveSelectedItem = 0;
+        for (int i = 0; i < lastSelectedItemIndex; i++) {
+            lastHeightAboveSelectedItem += lastChildrenHeightList.get(i);
+            currHeigtAboveSelectedItem += currChildrenHeightList.get(i);
         }
-
-        return result;
+        return currHeigtAboveSelectedItem - lastHeightAboveSelectedItem;
     }
-
-    /**
-     * 找到原本看不见的，第一组连续设为了{@link View#VISIBLE}的子View的高度
-     */
-    static List<Integer> findBecomeVisibleViewWhenNotShown(List<Integer> childrenHeightList,
-                                                           List<Integer> lastChildrenHeightList) {
-        List<Integer> result = new ArrayList<>();
-        if (childrenHeightList.size() != lastChildrenHeightList.size()) {
-            return result;
-        }
-
-        for (int i = 0; i < lastChildrenHeightList.size(); i++) {
-            if (lastChildrenHeightList.get(i) != 0) {
-                // 从上往下，只要遇到不等于0，就是visible的，就不用找了，没有
-                break;
-            }
-            if (childrenHeightList.get(i) == 0) {
-                // 当前这个子view为gone，而如果之前也是gone，说明不是这个，继续
-                continue;
-            }
-            // 当前遍历到的子View为gone，而之前不是gone，那么找到你了！
-            result.add(i);
-
-        }
-        return result;
-    }
-
 
 }

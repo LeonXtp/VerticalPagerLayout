@@ -34,63 +34,12 @@ class SubItemChangeHelper {
             return;
         }
         // 处理子View可见性变化
-        if (!handleUnShownViewGone(verticalPagerLayout, lastChildrenHeights, currentChildrenHeights,
-                lastSelectedItemIndex)) {
-            handleUnShownViewBecomeVisible(verticalPagerLayout, lastChildrenHeights, currentChildrenHeights,
-                    lastSelectedItemIndex);
-        }
-    }
-
-    /**
-     * 处理当滑出可见区域的子item变为不可见时的情形
-     * 期望结果：view不出现上移
-     */
-    private static boolean handleUnShownViewGone(VerticalPagerLayout verticalPagerLayout,
-                                                 List<Integer> lastChildrenHeights,
-                                                 List<Integer> currentChildrenHeights,
-                                                 int lastSelectedItemIndex) {
         // 找到设置为gone的item下标
-        List<Integer> goneItemIndexes = ComputeUtil.findGoneViewWhenNotShown(currentChildrenHeights,
-                lastChildrenHeights);
-        int goneViewHeight = 0;
-        // 确定变为gone的view是否在滑出可见区域的时候变的
-        for (int i = 0; i < goneItemIndexes.size(); i++) {
-            int index = goneItemIndexes.get(i);
-            if (index < lastSelectedItemIndex) {
-                goneViewHeight += lastChildrenHeights.get(index);
-            }
-        }
+        int dy = ComputeUtil.dyForUnShownHeightChange(currentChildrenHeights, lastChildrenHeights,
+                lastSelectedItemIndex);
 
-        if (goneViewHeight != 0) {
-            verticalPagerLayout.quickScrollBy(-goneViewHeight);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * 处理当滑出可见区域的子item变为可见时的情形
-     * 期望结果：view不出现下移
-     */
-    private static void handleUnShownViewBecomeVisible(VerticalPagerLayout verticalPagerLayout,
-                                                       List<Integer> lastChildrenHeights,
-                                                       List<Integer> currentChildrenHeights,
-                                                       int lastSelectedItemIndex) {
-        List<Integer> visibleItemIndexes = ComputeUtil.findBecomeVisibleViewWhenNotShown(currentChildrenHeights,
-                lastChildrenHeights);
-
-        int visibleViewHeight = 0;
-        // 确定变为gone的view是否在滑出可见区域的时候变的
-        // 确定变为gone的view是否在滑出可见区域的时候变的
-        for (int i = 0; i < visibleItemIndexes.size(); i++) {
-            int index = visibleItemIndexes.get(i);
-            if (index < lastSelectedItemIndex) {
-                visibleViewHeight += currentChildrenHeights.get(index);
-            }
-        }
-
-        if (visibleViewHeight != 0) {
-            verticalPagerLayout.quickScrollBy(visibleViewHeight);
+        if (dy != 0) {
+            verticalPagerLayout.quickScrollBy(dy);
         }
     }
 
