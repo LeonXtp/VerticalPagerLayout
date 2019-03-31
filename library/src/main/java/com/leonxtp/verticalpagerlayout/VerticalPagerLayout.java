@@ -101,6 +101,8 @@ public class VerticalPagerLayout extends LinearLayout {
      */
     private int mLastSelectedItemIndex = 0;
 
+    private int mLastSelectedItemId = 0;
+
     private OnItemScrollListener mOnItemScrollListener = null;
 
     public VerticalPagerLayout(Context context) {
@@ -219,7 +221,7 @@ public class VerticalPagerLayout extends LinearLayout {
         initChildrenHeights();
 
         SubItemChangeHelper.handleSubItemChanged(this, isKeepContentOnItemVisibilityChanged,
-                mLastChildrenHeights, mCurrentChildrenHeights, mLastSelectedItemIndex);
+                mLastChildrenHeights, mCurrentChildrenHeights, mLastSelectedItemIndex, mLastSelectedItemId);
         mLastChildrenHeights.clear();
         mLastChildrenHeights.addAll(mCurrentChildrenHeights);
 
@@ -274,6 +276,7 @@ public class VerticalPagerLayout extends LinearLayout {
         float[] firstVisibleItemInfo = ComputeUtil.findFirstShownItem(mCurrentChildrenHeights, getScrollY());
         mLastSelectedItemIndex = getScrollY() != mScrollableHeight && firstVisibleItemInfo[1] < 0.1f ?
                 (int) firstVisibleItemInfo[0] + 1 : (int) firstVisibleItemInfo[0];
+        mLastSelectedItemId = getChildAt(mLastSelectedItemIndex).getId();
         Logger.d(TAG, "mLastSelectedItemIndex = " + mLastSelectedItemIndex);
     }
 
@@ -452,6 +455,7 @@ public class VerticalPagerLayout extends LinearLayout {
             return;
         }
         mLastSelectedItemIndex = firstVisibleItemIndex;
+        mLastSelectedItemId = getChildAt(mLastSelectedItemIndex).getId();
         Logger.d(TAG, "mLastSelectedItemIndex = " + mLastSelectedItemIndex);
 
         if (mOnItemScrollListener != null) {

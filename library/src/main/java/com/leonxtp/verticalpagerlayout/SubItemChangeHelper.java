@@ -22,21 +22,24 @@ class SubItemChangeHelper {
      *                                             保存的上次子item高度
      * @param currentChildrenHeights               当前的各子item高度
      * @param lastSelectedItemIndex                {@link View#onLayout(boolean, int, int, int, int)}中isChanged为true时，
-     *                                             之前选中的item下标
+     *                                             之前选中的item的index
+     * @param lastSelectedItemId                   {@link View#onLayout(boolean, int, int, int, int)}中isChanged为true时，
+     *                                             之前选中的item的id
      */
     static void handleSubItemChanged(VerticalPagerLayout verticalPagerLayout,
                                      boolean isKeepContentOnItemVisibilityChanged,
                                      List<Integer> lastChildrenHeights,
                                      List<Integer> currentChildrenHeights,
-                                     int lastSelectedItemIndex) {
+                                     int lastSelectedItemIndex,
+                                     int lastSelectedItemId) {
 
         if (!isKeepContentOnItemVisibilityChanged) {
             return;
         }
         // 处理子View可见性变化
         // 找到设置为gone的item下标
-        int dy = ComputeUtil.dyForUnShownHeightChange(currentChildrenHeights, lastChildrenHeights,
-                lastSelectedItemIndex);
+        int dy = ComputeUtil.dyForUnShownHeightChange(verticalPagerLayout, currentChildrenHeights, lastChildrenHeights,
+                lastSelectedItemIndex, lastSelectedItemId);
 
         if (dy != 0) {
             verticalPagerLayout.quickScrollBy(dy);

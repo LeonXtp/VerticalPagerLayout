@@ -370,20 +370,39 @@ class ComputeUtil {
 
     }
 
-    static int dyForUnShownHeightChange(List<Integer> currChildrenHeightList, List<Integer> lastChildrenHeightList,
-                                        int lastSelectedItemIndex) {
+    static int dyForUnShownHeightChange(VerticalPagerLayout verticalPagerLayout,
+                                        List<Integer> currChildrenHeightList,
+                                        List<Integer> lastChildrenHeightList,
+                                        int lastSelectedItemIndex,
+                                        int lastSelectedItemId) {
 
-        if (lastSelectedItemIndex >= lastChildrenHeightList.size() ||
-                lastSelectedItemIndex >= currChildrenHeightList.size()) {
+        if (lastSelectedItemIndex >= lastChildrenHeightList.size()) {
             return 0;
         }
 
         int lastHeightAboveSelectedItem = 0, currHeigtAboveSelectedItem = 0;
+
         for (int i = 0; i < lastSelectedItemIndex; i++) {
             lastHeightAboveSelectedItem += lastChildrenHeightList.get(i);
+        }
+
+        // 有可能在本次layout过程中发现，上次的那个item已经被remove了
+        // TODO 进一步考虑，当上次的item remove时，分别是第1、最后一个item时的情况
+        boolean isFoundLastSelectedItem = false;
+        for (int i = 0; i < currChildrenHeightList.size(); i++) {
+
+            int childId = verticalPagerLayout.getChildAt(i).getId();
+            if (childId == lastSelectedItemId) {
+                isFoundLastSelectedItem = true;
+                break;
+            }
             currHeigtAboveSelectedItem += currChildrenHeightList.get(i);
         }
-        return currHeigtAboveSelectedItem - lastHeightAboveSelectedItem;
+
+        if (isFoundLastSelectedItem) {
+            return currHeigtAboveSelectedItem - lastHeightAboveSelectedItem;
+        }
+        return 0;
     }
 
 }
