@@ -37,11 +37,19 @@ public class VerticalPagerLayout extends LinearLayout {
     private Scroller mScroller;
     private int mTouchSlop;
     /**
+     * 是否在开启日志开关的情况下，是否打印move事件的日志
+     */
+    private boolean isLogForMoveEvents = false;
+    /**
      * 本View尚未完成绘制时，外部可能就已经调用了其{@link #scrollToItem(int, boolean)}方法，
      * 此时是无效的，因此需要在layout完成时，继续完成外部在此前的一次调用
      */
     private boolean isFirstLayoutFinished = false;
     private int mIndex2ScrollBeforeLayout = -1;
+    /**
+     * 是否允许过度拖动，如，当前显示第0个item的时候，仍然继续下拉
+     */
+    private boolean isPullOverScrollEnabled = false;
     /**
      * 当前是否正在滑动，包括手指拖动以及自动滚动两个阶段。
      * 自然状态下，View在自动滚动过程中，再次点按屏幕，滚动过程将不会停下，
@@ -124,6 +132,13 @@ public class VerticalPagerLayout extends LinearLayout {
     //<editor-fold desc="public methods">
 
     /**
+     * 设置是否允许过度拖动，如，当前显示第0个item的时候，仍然继续下拉，默认true
+     */
+    public void setPullOverScrollEnabled(boolean pullOverScrollEnabled) {
+        this.isPullOverScrollEnabled = pullOverScrollEnabled;
+    }
+
+    /**
      * 设置是否可以跨越子View拖动，
      * 如当前显示第0个item，手指拖动至第3个（不管是否超过第3个的一半），松开时自动滑动至第1个，
      * 如当前显示第1个item，手指拖动至第0个，且不超过第0个的一半，则松开手指时自动回弹至第1个
@@ -178,6 +193,13 @@ public class VerticalPagerLayout extends LinearLayout {
 
     public void setLogging(boolean isLogging) {
         Logger.setLogging(isLogging);
+    }
+
+    /**
+     * 设置在开启日志的情况下，是否打印move事件的日志
+     */
+    public void setLogMoveEvents(boolean isVerbose) {
+        this.isLogForMoveEvents = isVerbose;
     }
 
     /**
@@ -277,10 +299,8 @@ public class VerticalPagerLayout extends LinearLayout {
         mLastSelectedItemIndex = getScrollY() != mScrollableHeight && firstVisibleItemInfo[1] < 0.1f ?
                 (int) firstVisibleItemInfo[0] + 1 : (int) firstVisibleItemInfo[0];
         mLastSelectedItemId = getChildAt(mLastSelectedItemIndex).getId();
-        Logger.d(TAG, "mLastSelectedItemIndex = " + mLastSelectedItemIndex);
+        Logger.d(TAG, "resetLastSelectedItem, mLastSelectedItemIndex = " + mLastSelectedItemIndex);
     }
-
-    //
 
     private float previousTouchX, previousTouchY;
 
@@ -330,16 +350,28 @@ public class VerticalPagerLayout extends LinearLayout {
                 if (Math.abs(moveY) >= 1 && Math.abs(moveY) < mTouchSlop * 0.6f) {
                     break;
                 }
-//                Logger.w(TAG, "onInterceptTouchEvent ACTION_MOVE， moveY: " + moveY);
+                Logger.d(TAG, "onInterceptTouchEvent ACTION_MOVE， moveY: " + moveY, isLogForMoveEvents);
 
                 previousTouchX = ev.getX();
                 previousTouchY = ev.getY();
 
                 if (Math.abs(moveY) > Math.abs(moveX)) {
-//                    Logger.w(TAG, "onInterceptTouchEvent move vertically");
-                    intercept = true;
+
+                    Logger.d(TAG, "onInterceptTouchEvent move vertically", isLogForMoveEvents);
+
+                    // 判断是否允许OverScroll
+                    boolean isPullDownOverScroll = getScrollY() <= 0 && moveY < 0;
+                    boolean isPullUpOverScroll = getScrollY() >= mScrollableHeight && moveY > 0;
+                    if (isPullOverScrollEnabled) {
+                        intercept = true;
+                    } else if (!isPullDownOverScroll && !isPullUpOverScroll) {
+                        intercept = true;
+                    } else {
+                        Logger.w(TAG, "onInterceptTouchEvent move vertical overscroll, disabled", isLogForMoveEvents);
+                    }
+
                 } else {
-//                    Logger.w(TAG, "onInterceptTouchEvent move horizontally");
+                    Logger.w(TAG, "onInterceptTouchEvent move horizontally", isLogForMoveEvents);
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
@@ -384,31 +416,45 @@ public class VerticalPagerLayout extends LinearLayout {
                 Logger.w(TAG, "onTouchEvent ACTION_POINTER_DOWN");
                 break;
             case MotionEvent.ACTION_MOVE:
-//                Logger.w(TAG, "onTouchEvent ACTION_MOVE");
+                Logger.w(TAG, "onTouchEvent ACTION_MOVE", isLogForMoveEvents);
                 if (!isVerticalMoveEnabled) {
                     // 当外部调用setMoveEnabled()方法禁用本View当触摸事件时
                     handled = false;
-//                    Logger.w(TAG, "onTouchEvent isVerticalMoveEnabled false, break;");
+                    Logger.w(TAG, "onTouchEvent isVerticalMoveEnabled false, break;", isLogForMoveEvents);
                     break;
                 }
 
                 float moveX = previousTouchX - ev.getX();
                 float moveY = previousTouchY - ev.getY();
-//                Logger.w(TAG, "moveY: " + moveY);
+                Logger.w(TAG, "moveY: " + moveY, isLogForMoveEvents);
 
                 previousTouchX = ev.getX();
                 previousTouchY = ev.getY();
 
-                if (Math.abs(moveY) > Math.abs(moveX)) {
-//                    Logger.w(TAG, "onTouchEvent move vertically");
-                    isScrolling = true;
-//                    Logger.d(TAG, "onTouchEvent moving isScrolling = true");
-                    if (!isPointerActionTriggered) {
+                if (Math.abs(moveY) <= Math.abs(moveX)) {
+                    break;
+                }
+
+                Logger.d(TAG, "onTouchEvent move vertically", isLogForMoveEvents);
+                isScrolling = true;
+                Logger.d(TAG, "onTouchEvent moving isScrolling = true", isLogForMoveEvents);
+                if (!isPointerActionTriggered) {
+
+                    boolean isPullDownOverScroll = getScrollY() <= 0 && moveY < 0;
+                    boolean isPullUpOverScroll = getScrollY() >= mScrollableHeight && moveY > 0;
+                    if (isPullOverScrollEnabled) {
                         // 当上次触摸事件中触发了
                         MoveScrollHelper.onMoveVertical(this, mScrollableHeight, moveY);
+                    } else if (!isPullDownOverScroll && !isPullUpOverScroll) {
+                        // 当上次触摸事件中触发了
+                        MoveScrollHelper.onMoveVertical(this, mScrollableHeight, moveY);
+                    } else {
+                        handled = false;
+                        Logger.w(TAG, "onTouchEvent move vertical overscroll, disabled", isLogForMoveEvents);
                     }
-                    isPointerActionTriggered = false;
                 }
+                isPointerActionTriggered = false;
+
                 break;
             case MotionEvent.ACTION_CANCEL:
                 Logger.w(TAG, "onTouchEvent ACTION_CANCEL");
